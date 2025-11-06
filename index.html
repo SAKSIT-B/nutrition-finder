@@ -3,28 +3,22 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Nutrition Finder | ค้นหาคุณค่าโภชนาการอาหาร</title>
+  <title>Nutrition Finder | ค้นหาคุณค่าโภชนาการ</title>
   <meta name="description" content="ค้นหาโภชนาการจาก OpenFoodFacts บน GitHub Pages (Static Web App)" />
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
   <style>
     /* ===== Theme system (Light/Dark with CSS variables) ===== */
-    :root{
-      --radius:16px;
-      --shadow:0 5px 18px rgba(15,23,42,.06);
-    }
+    :root{ --radius:16px; --shadow:0 5px 18px rgba(15,23,42,.06); }
     :root, [data-theme="light"]{
       --bg:#f7fafc; --text:#0f172a; --muted:#5b677a; --card:#ffffff; --border:#e5e9f2;
-      --accent:#2563eb; --accent-weak:#e6efff; --chip:#f1f5f9; --chip-border:#e2e8f0;
-      --link:#0b5ad9;
+      --accent:#2563eb; --accent-weak:#e6efff; --chip:#f1f5f9; --chip-border:#e2e8f0; --link:#0b5ad9;
     }
     [data-theme="dark"]{
       --bg:#0b1220; --text:#e7ecf5; --muted:#8ea0bd; --card:#121a2b; --border:#1f2a44;
-      --accent:#74c0fc; --accent-weak:#0c2d4f; --chip:#0f1729; --chip-border:#223154;
-      --link:#a6c8ff;
+      --accent:#74c0fc; --accent-weak:#0c2d4f; --chip:#0f1729; --chip-border:#223154; --link:#a6c8ff;
     }
-
     *{box-sizing:border-box}
     html,body{height:100%}
     body{margin:0;font-family:Inter,system-ui,Segoe UI,Roboto,Helvetica,Arial,sans-serif;background:var(--bg);color:var(--text)}
@@ -74,7 +68,7 @@
     .muted{color:var(--muted)}
 
     .actions{display:flex;gap:8px;margin-top:12px}
-    .btn{border:1px solid var(--border);background:var(--card);color:var(--text);padding:8px 10px;border-radius:10px;cursor:pointer}
+    .btn{border:1px solid var(--border);background:var(--card);color:var(--text);padding:8px 10px;border-radius:10px;cursor:pointer;text-decoration:none}
 
     .loader{display:none;place-items:center;margin:24px auto;color:var(--muted)}
     .empty{color:var(--muted);text-align:center;margin:26px 0}
@@ -88,7 +82,7 @@
   </style>
 </head>
 <body>
-  <!-- ===== Topbar (มีเครดิตบนสุด + ปุ่มสลับธีม) ===== -->
+  <!-- ===== Topbar ===== -->
   <div class="topbar">
     <div class="container">
       <div class="wrap">
@@ -103,17 +97,17 @@
   </div>
 
   <div class="container">
-    <!-- ===== แถบโลโก้ 3 โลโก้ (ใส่ URL/ไฟล์ของคุณตรง LOGO_URL_* ) ===== -->
+    <!-- ===== Brand logos (3) ===== -->
     <div class="brandstrip" id="brandStrip">
-      <img id="logo1" alt="สถาบัน 1" src="LOGO_URL_1" />
-      <img id="logo2" alt="สถาบัน 2" src="LOGO_URL_2" />
-      <img id="logo3" alt="สถาบัน 3" src="LOGO_URL_3" />
+      <img id="logo1" alt="สถาบัน 1" src="" />
+      <img id="logo2" alt="สถาบัน 2" src="" />
+      <img id="logo3" alt="สถาบัน 3" src="" />
     </div>
 
     <!-- ===== Hero ===== -->
     <header class="hero" role="banner">
-      <h1>ค้นหาคุณค่าโภชนาการอาหาร</h1>
-      <p class="sub">ดึงข้อมูลจากฐานสาธารณะ OpenFoodFacts  แบบเรียลไทม์ · เว็บสแตติกบน GitHub Pages · เหมาะกับงานสอน/สืบค้น</p>
+      <h1>ค้นหาคุณค่าโภชนาการ</h1>
+      <p class="sub">ดึงข้อมูลจากฐานสาธารณะ <a href="https://world.openfoodfacts.org/" target="_blank" rel="noopener">OpenFoodFacts</a> แบบเรียลไทม์ · เว็บสแตติกบน GitHub Pages · เหมาะกับงานสอน/สืบค้น</p>
 
       <form class="searchbar" id="searchForm">
         <label class="sr" for="q">คำค้นหา</label>
@@ -130,6 +124,9 @@
           </select>
         </span>
         <span class="pill">หน่วยต่อ 100 g (ตามฉลาก)</span>
+        <label class="pill" for="thOnly" title="กรองเฉพาะรายการที่ระบุว่าอยู่ในประเทศไทยหรือซื้อในไทย">
+          <input id="thOnly" type="checkbox" style="margin-right:6px"> เฉพาะข้อมูลในไทย
+        </label>
       </div>
 
       <div class="loader" id="loader">กำลังค้นหา…</div>
@@ -140,7 +137,7 @@
     <section class="results" id="results" aria-live="polite"></section>
   </div>
 
-  <!-- ===== Footer (เครดิตล่างสุด) ===== -->
+  <!-- ===== Footer ===== -->
   <footer>
     <div class="container">
       <div>แหล่งข้อมูล: OpenFoodFacts (สาธารณะ). ค่าที่แสดงเป็น <em>per 100 g</em> จากฉลากผู้ผลิต อาจไม่ครบทุกสารอาหาร</div>
@@ -150,25 +147,32 @@
 
 <script>
 // ===== Config =====
-const API_SEARCH = 'https://world.openfoodfacts.org/cgi/search.pl';
+const API_SEARCH = 'https://world.openfoodfacts.org/cgi/search.pl'; // ใช้ world endpoint และกรองประเทศไทยเมื่อเลือก
 const IMG_FALLBACK = 'https://static.openfoodfacts.org/images/icons/dist/product-add.svg';
 
-/* ===== (1) เครดิตผู้จัดทำ — ใส่ของคุณที่นี่ ===== */
+/* (1) เครดิตผู้จัดทำ — ใส่ของคุณที่นี่ */
 const CREDIT_TEXT = "ผู้จัดทำ: ครูศักดิ์สิทธิ์ บำรุง | แผนกวิชาอาหารและโภชนาการ วิทยาลัยอาชีวศึกษาสุโขทัย | © 2025"; // ←← แก้บรรทัดนี้
 
-/* ===== (2) โลโก้ 3 ภาพ — ใส่ URL หรือพาธไฟล์ใน repo ของคุณ =====
-   ตัวอย่าง ถ้าอัปโหลดไฟล์ไว้ในโฟลเดอร์ assets/img:
-   const LOGOS = ["assets/img/logo1.png","assets/img/logo2.png","assets/img/logo3.png"];
-*/
-const LOGOS = ["assets/img/logo1.png","assets/img/logo2.png","assets/img/logo3.png"]; // ←← แก้รายการนี้ให้เป็นรูปจริงของคุณ
+/* (2) โลโก้ 3 รูป — ใส่พาธไฟล์/URL ของคุณ */
+const LOGOS = ["assets/img/logo1.png","assets/img/logo2.png","assets/img/logo3.png"]; // ←← แก้เป็นไฟล์จริงของคุณ
 
-/* ===== Theme preference: เก็บใน localStorage และสลับได้จากปุ่ม ===== */
+/* Theme preference: เก็บใน localStorage และสลับได้จากปุ่ม */
 const root = document.documentElement;
 function applyTheme(t){ root.setAttribute('data-theme', t); localStorage.setItem('nf-theme', t); }
 function toggleTheme(){ const cur = root.getAttribute('data-theme')||'light'; applyTheme(cur==='light'?'dark':'light'); }
 (function initTheme(){ applyTheme(localStorage.getItem('nf-theme')||'light'); })();
 
-// ===== แสดงเครดิตบน-ล่าง + โลโก้ =====
+document.getElementById('themeToggle').addEventListener('click', toggleTheme);
+
+// ===== Safe logo setter: ซ่อนภาพถ้าโหลดไม่ได้ (กันกากบาท) =====
+function safeSetLogo(id, src){
+  const el = document.getElementById(id);
+  if(!el) return;
+  el.onerror = () => { el.style.display = 'none'; }; // ถ้าโหลดไม่สำเร็จ ให้ซ่อน
+  if(src) el.src = src;
+}
+
+// ===== DOM Ready: เครดิต + โลโก้ + โฟกัสช่องค้นหา =====
 window.addEventListener('DOMContentLoaded',()=>{
   const top = document.getElementById('creditTop');
   const bottom = document.getElementById('creditBottom');
@@ -176,28 +180,23 @@ window.addEventListener('DOMContentLoaded',()=>{
   if(bottom) bottom.textContent = CREDIT_TEXT;
 
   const [l1,l2,l3] = LOGOS;
-  if(l1) document.getElementById('logo1').src = l1;
-  if(l2) document.getElementById('logo2').src = l2;
-  if(l3) document.getElementById('logo3').src = l3;
+  safeSetLogo('logo1', l1);
+  safeSetLogo('logo2', l2);
+  safeSetLogo('logo3', l3);
 
   document.getElementById('q').focus();
 });
 
-document.getElementById('themeToggle').addEventListener('click', toggleTheme);
-
 // ===== Helpers =====
 const $ = (sel)=>document.querySelector(sel);
-function fmt(num, digits=1){
-  if(num===undefined || num===null || Number.isNaN(num)) return '–';
-  return Number(num).toFixed(digits);
-}
-function makeChip(label, value, unit=''){
-  return `<div class="chip"><span>${label}</span><strong>${value} ${unit}</strong></div>`;
-}
+function fmt(num, digits=1){ if(num===undefined || num===null || Number.isNaN(num)) return '–'; return Number(num).toFixed(digits); }
+function makeChip(label, value, unit=''){ return `<div class="chip"><span>${label}</span><strong>${value} ${unit}</strong></div>`; }
 
-// ===== Copy nutrition text for a product =====
+// ข้อความสำหรับคัดลอก
 function buildNutritionText(p){
   const N = p.nutriments||{};
+  const name = p.product_name_th || p.generic_name_th || p.product_name || p.generic_name || '-';
+  const brand = p.brands || '-';
   const energy = N['energy-kcal_100g'] ?? (N['energy_100g']? N['energy_100g']/4.184 : undefined);
   const protein = N['proteins_100g'];
   const fat = N['fat_100g'];
@@ -207,18 +206,7 @@ function buildNutritionText(p){
   const sodium = N['sodium_100g'];
   const salt = N['salt_100g'];
   return (
-`ชื่อผลิตภัณฑ์: ${p.product_name||p.generic_name||'-'}
-ยี่ห้อ: ${p.brands||'-'}
-ต่อ 100 g:
-- พลังงาน: ${fmt(energy)} kcal
-- โปรตีน: ${fmt(protein)} g
-- ไขมัน: ${fmt(fat)} g
-- คาร์บฯ: ${fmt(carbs)} g
-- น้ำตาล: ${fmt(sugars)} g
-- ใยอาหาร: ${fmt(fiber)} g
-- โซเดียม: ${sodium!=null?fmt(sodium*1000):'–'} mg
-- เกลือ: ${fmt(salt)} g
-แหล่งข้อมูล: OpenFoodFacts`
+`ชื่อผลิตภัณฑ์: ${name}\nยี่ห้อ: ${brand}\nต่อ 100 g:\n- พลังงาน: ${fmt(energy)} kcal\n- โปรตีน: ${fmt(protein)} g\n- ไขมัน: ${fmt(fat)} g\n- คาร์บฯ: ${fmt(carbs)} g\n- น้ำตาล: ${fmt(sugars)} g\n- ใยอาหาร: ${fmt(fiber)} g\n- โซเดียม: ${sodium!=null?fmt(sodium*1000):'–'} mg\n- เกลือ: ${fmt(salt)} g\nแหล่งข้อมูล: OpenFoodFacts`
   );
 }
 async function copyNutrition(p){
@@ -226,9 +214,9 @@ async function copyNutrition(p){
   catch(e){ console.error(e); alert('คัดลอกไม่สำเร็จ ลองอีกครั้ง'); }
 }
 
-// ===== Render Card (เพิ่มปุ่มคัดลอก + ปุ่มเปิดหน้ารายการ) =====
+// การ์ดผลลัพธ์ + ปุ่มคัดลอก/เปิดแหล่งข้อมูล
 function renderCard(p){
-  const n = p.product_name || p.generic_name || '(ไม่มีชื่อผลิตภัณฑ์)';
+  const n = p.product_name_th || p.generic_name_th || p.product_name || p.generic_name || '(ไม่มีชื่อผลิตภัณฑ์)';
   const brand = p.brands || '—';
   const img = p.image_front_small_url || p.image_url || IMG_FALLBACK;
   const N = p.nutriments || {};
@@ -261,16 +249,14 @@ function renderCard(p){
       </div>
       <div class="muted" style="margin-top:10px">รหัสบาร์โค้ด: ${code || '—'} · ประเทศ: ${p.countries || '—'}</div>
       <div class="actions">
-        <button class="btn" onclick='copyNutrition(${JSON.stringify({
-          code: code, product_name: n, brands: brand, nutriments: N
-        })})'>คัดลอกสารอาหาร</button>
+        <button class="btn" onclick='copyNutrition(${JSON.stringify({ code: '', product_name: n, brands: brand, nutriments: N })})'>คัดลอกสารอาหาร</button>
         <a class="btn" href="${url}" target="_blank" rel="noopener">เปิดแหล่งข้อมูล</a>
       </div>
     </div>
   </article>`;
 }
 
-// ===== Search =====
+// ค้นหา
 async function searchFoods(q, pageSize=20){
   const url = new URL(API_SEARCH);
   url.searchParams.set('search_terms', q);
@@ -278,6 +264,19 @@ async function searchFoods(q, pageSize=20){
   url.searchParams.set('action', 'process');
   url.searchParams.set('json', '1');
   url.searchParams.set('page_size', String(pageSize));
+  url.searchParams.set('lc', 'th'); // ขอภาษาไทยถ้ามี
+
+  const thOnly = document.getElementById('thOnly')?.checked;
+  if(thOnly){
+    // countries contains Thailand
+    url.searchParams.set('tagtype_0','countries');
+    url.searchParams.set('tag_contains_0','contains');
+    url.searchParams.set('tag_0','Thailand');
+    // purchase_places contains Thailand
+    url.searchParams.set('tagtype_1','purchase_places');
+    url.searchParams.set('tag_contains_1','contains');
+    url.searchParams.set('tag_1','Thailand');
+  }
 
   $('#loader').style.display='grid';
   $('#empty').textContent='';
@@ -290,7 +289,7 @@ async function searchFoods(q, pageSize=20){
     const products = (data.products||[]).filter(p=>p.nutriments);
 
     if(products.length===0){
-      $('#empty').textContent='ไม่พบข้อมูล ลองใช้คำค้นอื่น (เช่น ภาษาอังกฤษ/ทั่วไป)';
+      $('#empty').textContent='ไม่พบข้อมูล ลองใช้คำค้นอื่น หรือเอาติ๊ก "เฉพาะข้อมูลในไทย" ออกเพื่อขยายผลการค้นหา';
       return;
     }
     const html = products.map(renderCard).join('');
@@ -303,15 +302,12 @@ async function searchFoods(q, pageSize=20){
   }
 }
 
-// ===== Events =====
+// Events
 const form = $('#searchForm');
 form.addEventListener('submit', (e)=>{
   e.preventDefault();
   const q = $('#q').value.trim();
-  if(!q){
-    $('#empty').textContent='โปรดพิมพ์คำค้นหา';
-    return;
-  }
+  if(!q){ $('#empty').textContent='โปรดพิมพ์คำค้นหา'; return; }
   const pageSize = Number($('#pageSize').value || 20);
   searchFoods(q, pageSize);
 });
