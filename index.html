@@ -3,82 +3,155 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Nutrition Finder | ‡∏Ñ‡πâ‡∏ô‡∏´‡∏≤‡∏Ñ‡∏∏‡∏ì‡∏Ñ‡πà‡∏≤‡πÇ‡∏†‡∏ä‡∏ô‡∏≤‡∏Å‡∏≤‡∏£</title>
-  <meta name="description" content="‡∏Ñ‡πâ‡∏ô‡∏´‡∏≤‡πÇ‡∏†‡∏ä‡∏ô‡∏≤‡∏Å‡∏≤‡∏£‡∏à‡∏≤‡∏Å OpenFoodFacts ‡∏ö‡∏ô GitHub Pages (Static Web App)" />
+  <title>Nutrition Finder | §ÈπÀ“§ÿ≥§Ë“‚¿™π“°“√Õ“À“√</title>
+  <meta name="description" content="§ÈπÀ“‚¿™π“°“√®“° OpenFoodFacts ∫π GitHub Pages (Static Web App)" />
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
   <style>
-    :root{--bg:#0b1220;--card:#121a2b;--muted:#7e8ba3;--text:#e7ecf5;--accent:#74c0fc;--good:#2ecc71;--warn:#f59f00}
+    /* ===== Theme: Light, modern, accessible ===== */
+    :root{
+      --bg:#f7fafc;         /* æ◊ÈπÀ≈—ßÕËÕπ */
+      --text:#0f172a;       /* µ—«Õ—°…√‡¢È¡ */
+      --muted:#5b677a;      /* Õ∏‘∫“¬/√Õß */
+      --card:#ffffff;       /* °“√Ï¥ */
+      --border:#e5e9f2;     /* ‡ Èπ§—Ëπ */
+      --accent:#2563eb;     /* øÈ“‡¢È¡ */
+      --accent-weak:#e6efff;/* øÈ“ÕËÕπ */
+      --chip:#f1f5f9;       /* æ◊Èπ™‘ª */
+      --chip-border:#e2e8f0;/* ‡ Èπ™‘ª */
+      --radius:16px;
+      --shadow:0 5px 18px rgba(15,23,42,.06);
+    }
+
     *{box-sizing:border-box}
-    body{margin:0;font-family:Inter,system-ui,Segoe UI,Roboto,Helvetica,Arial,sans-serif;background:linear-gradient(180deg,#0b1220 0%,#0e1628 100%);color:var(--text)}
-    header{max-width:1000px;margin:40px auto 16px;padding:0 20px}
-    h1{font-size:clamp(24px,3.5vw,40px);margin:0 0 8px;line-height:1.15}
-    p.sub{margin:0;color:var(--muted)}
-    .searchbar{max-width:1000px;margin:18px auto 8px;padding:0 20px;display:grid;grid-template-columns:1fr auto;gap:10px}
-    input[type="search"]{width:100%;padding:14px 16px;border-radius:14px;border:1px solid #23304d;background:#0f1729;color:var(--text);outline:none}
-    button{border:0;background:var(--accent);color:#06131f;padding:12px 16px;border-radius:12px;font-weight:700;cursor:pointer}
-    .options{max-width:1000px;margin:0 auto;padding:0 20px;color:var(--muted);display:flex;gap:14px;align-items:center;flex-wrap:wrap}
-    .results{max-width:1000px;margin:18px auto 60px;padding:0 20px;display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:16px}
-    .card{background:var(--card);border:1px solid #1e2a44;border-radius:18px;overflow:hidden;display:flex;flex-direction:column}
-    .card .imgwrap{background:#0f1729;height:170px;display:flex;align-items:center;justify-content:center}
+    html,body{height:100%}
+    body{margin:0;font-family:Inter,system-ui,Segoe UI,Roboto,Helvetica,Arial,sans-serif;background:var(--bg);color:var(--text)}
+
+    /* Header */
+    .topbar{position:sticky;top:0;z-index:10;background:rgba(255,255,255,.8);backdrop-filter: blur(10px);border-bottom:1px solid var(--border)}
+    .container{max-width:1100px;margin:0 auto;padding:0 20px}
+    .topbar .wrap{display:flex;align-items:center;gap:14px;min-height:64px}
+    .logo{display:inline-flex;align-items:center;gap:10px;text-decoration:none;color:inherit}
+    .logo .dot{width:12px;height:12px;border-radius:999px;background:var(--accent)}
+    .title{font-weight:800;font-size:18px;letter-spacing:.2px}
+    .credit-top{margin-left:auto;font-size:13px;color:var(--muted)}
+
+    /* Hero / Intro */
+    header.hero{padding:24px 0 10px}
+    header.hero h1{font-size:clamp(24px,3.2vw,38px);margin:6px 0 8px}
+    header.hero .sub{margin:0;color:var(--muted)}
+
+    /* Search */
+    .searchbar{margin:18px 0 6px;display:grid;grid-template-columns:1fr auto;gap:10px}
+    input[type="search"]{width:100%;padding:16px 16px;border-radius:var(--radius);border:1px solid var(--border);background:#fff;color:var(--text);outline:none;box-shadow:var(--shadow)}
+    input[type="search"]:focus{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-weak)}
+    button{border:0;background:var(--accent);color:#fff;padding:14px 18px;border-radius:12px;font-weight:700;cursor:pointer;box-shadow:var(--shadow)}
+    button:hover{filter:brightness(.95)}
+
+    /* Options */
+    .options{color:var(--muted);display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+    .pill{background:#fff;border:1px solid var(--border);border-radius:999px;padding:6px 10px;font-size:12px;box-shadow:var(--shadow)}
+
+    /* Results */
+    .results{margin:18px 0 60px;display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:16px}
+    .card{background:var(--card);border:1px solid var(--border);border-radius:20px;overflow:hidden;display:flex;flex-direction:column;box-shadow:var(--shadow)}
+    .card .imgwrap{background:#f8fafc;height:170px;display:flex;align-items:center;justify-content:center}
     .card img{max-height:100%;max-width:100%;object-fit:contain}
     .card .body{padding:14px 14px 8px}
     .name{font-weight:700;margin:0 0 6px;font-size:16px}
     .brand{color:var(--muted);font-size:13px;margin-bottom:10px}
     .nutri{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:6px}
-    .chip{background:#0f1729;border:1px solid #223154;border-radius:10px;padding:8px;font-size:13px;display:flex;justify-content:space-between;gap:8px}
+    .chip{background:var(--chip);border:1px solid var(--chip-border);border-radius:12px;padding:10px 12px;font-size:13px;display:flex;justify-content:space-between;gap:8px}
     .muted{color:var(--muted)}
-    .footer{max-width:1000px;margin:0 auto 40px;padding:0 20px;color:var(--muted);font-size:13px}
+
     .loader{display:none;place-items:center;margin:24px auto;color:var(--muted)}
     .empty{color:var(--muted);text-align:center;margin:26px 0}
-    .badge{display:inline-block;background:#13223a;border:1px solid #26436b;color:#a6c8ff;padding:4px 8px;border-radius:999px;font-size:12px;margin-left:8px}
+
+    /* Footer */
+    footer{border-top:1px solid var(--border);padding:18px 0 40px;color:var(--muted);font-size:13px}
+    .credit-bottom{margin-top:6px}
+
+    a{color:#0b5ad9}
     .sr{position:absolute;left:-10000px;top:auto;width:1px;height:1px;overflow:hidden}
-    .pill{background:#0f1a2e;border:1px solid #263453;color:#c8d7ff;border-radius:999px;padding:6px 10px;font-size:12px}
-    a{color:#a6c8ff}
   </style>
 </head>
 <body>
-  <header>
-    <h1>Nutrition Finder <span class="badge">GitHub Pages</span></h1>
-    <p class="sub">‡πÄ‡∏ß‡πá‡∏ö‡πÑ‡∏ã‡∏ï‡πå‡∏Ñ‡πâ‡∏ô‡∏´‡∏≤ <strong>‡∏Ñ‡∏∏‡∏ì‡∏Ñ‡πà‡∏≤‡πÇ‡∏†‡∏ä‡∏ô‡∏≤‡∏Å‡∏≤‡∏£</strong> ‡∏à‡∏≤‡∏Å‡∏ê‡∏≤‡∏ô‡∏Ç‡πâ‡∏≠‡∏°‡∏π‡∏•‡∏™‡∏≤‡∏ò‡∏≤‡∏£‡∏ì‡∏∞ <a href="https://world.openfoodfacts.org/" target="_blank" rel="noopener">OpenFoodFacts</a> ‡πÅ‡∏ö‡∏ö‡πÄ‡∏£‡∏µ‡∏¢‡∏•‡πÑ‡∏ó‡∏°‡πå ¬∑ ‡πÑ‡∏°‡πà‡∏°‡∏µ‡πÄ‡∏ã‡∏¥‡∏£‡πå‡∏ü‡πÄ‡∏ß‡∏≠‡∏£‡πå ¬∑ ‡πÄ‡∏´‡∏°‡∏≤‡∏∞‡∏Å‡∏±‡∏ö‡∏á‡∏≤‡∏ô‡∏™‡∏≠‡∏ô/‡∏™‡∏∑‡∏ö‡∏Ñ‡πâ‡∏ô</p>
-  </header>
-
-  <form class="searchbar" id="searchForm">
-    <label class="sr" for="q">‡∏Ñ‡∏≥‡∏Ñ‡πâ‡∏ô‡∏´‡∏≤</label>
-    <input id="q" type="search" placeholder="‡∏û‡∏¥‡∏°‡∏û‡πå‡∏ä‡∏∑‡πà‡∏≠‡∏≠‡∏≤‡∏´‡∏≤‡∏£/‡∏ú‡∏•‡∏¥‡∏ï‡∏†‡∏±‡∏ì‡∏ë‡πå ‡πÄ‡∏ä‡πà‡∏ô yogurt, rice, chocolate‚Ä¶" autocomplete="off" />
-    <button id="btnSearch" type="submit">‡∏Ñ‡πâ‡∏ô‡∏´‡∏≤</button>
-  </form>
-
-  <div class="options">
-    <span class="pill" title="‡∏à‡∏≥‡∏ô‡∏ß‡∏ô‡∏ú‡∏•‡∏•‡∏±‡∏û‡∏ò‡πå‡∏ï‡πà‡∏≠‡∏´‡∏ô‡πâ‡∏≤">‡∏ú‡∏•/‡∏´‡∏ô‡πâ‡∏≤
-      <select id="pageSize" style="background:transparent;border:0;color:inherit">
-        <option>10</option>
-        <option selected>20</option>
-        <option>50</option>
-      </select>
-    </span>
-    <span class="pill">‡∏†‡∏≤‡∏©‡∏≤‡πÅ‡∏™‡∏î‡∏á‡∏ú‡∏•: ‡πÑ‡∏ó‡∏¢/‡∏≠‡∏±‡∏á‡∏Å‡∏§‡∏©</span>
-    <span class="pill">‡∏´‡∏ô‡πà‡∏ß‡∏¢‡∏ï‡πà‡∏≠ 100 g (‡∏à‡∏≤‡∏Å‡∏â‡∏•‡∏≤‡∏Å)</span>
+  <!-- ===== Topbar (µ”·ÀπËß„ Ë‡§√¥‘µ∫π ÿ¥) ===== -->
+  <div class="topbar">
+    <div class="container">
+      <div class="wrap">
+        <a class="logo" href="#" aria-label="Home">
+          <span class="dot"></span>
+          <span class="title">Nutrition Finder</span>
+        </a>
+        <div class="credit-top" id="creditTop"><!-- „ Ë‡§√¥‘µ∫π ÿ¥∑’Ëπ’Ë¥È«¬ §√‘ªµÏ À√◊Õ≈∫ id ·≈È«æ‘¡æÏ‡Õß°Á‰¥È --></div>
+      </div>
+    </div>
   </div>
 
-  <div class="loader" id="loader">‡∏Å‡∏≥‡∏•‡∏±‡∏á‡∏Ñ‡πâ‡∏ô‡∏´‡∏≤‚Ä¶</div>
-  <div class="empty" id="empty"></div>
-  <section class="results" id="results" aria-live="polite"></section>
+  <!-- ===== Hero ===== -->
+  <div class="container">
+    <header class="hero" role="banner">
+      <h1>§ÈπÀ“§ÿ≥§Ë“‚¿™π“°“√Õ“À“√</h1>
+      <p class="sub">¥÷ß¢ÈÕ¡Ÿ≈®“°∞“π “∏“√≥– OpenFoodFacts ·∫∫‡√’¬≈‰∑¡Ï ? ‡«Á∫ ·µµ‘°∫π GitHub Pages ? ‡À¡“–°—∫ß“π Õπ/ ◊∫§Èπ</p>
 
-  <div class="footer">
-    ‡πÅ‡∏´‡∏•‡πà‡∏á‡∏Ç‡πâ‡∏≠‡∏°‡∏π‡∏•: OpenFoodFacts (‡∏™‡∏≤‡∏ò‡∏≤‡∏£‡∏ì‡∏∞). ‡∏Ñ‡πà‡∏≤‡∏ó‡∏µ‡πà‡πÅ‡∏™‡∏î‡∏á‡πÄ‡∏õ‡πá‡∏ô <em>per 100 g</em> ‡∏ï‡∏≤‡∏°‡∏â‡∏•‡∏≤‡∏Å‡∏Ç‡∏≠‡∏á‡∏ú‡∏π‡πâ‡∏ú‡∏•‡∏¥‡∏ï ‡∏≠‡∏≤‡∏à‡∏°‡∏µ‡∏ö‡∏≤‡∏á‡∏£‡∏≤‡∏¢‡∏Å‡∏≤‡∏£‡πÑ‡∏°‡πà‡∏Ñ‡∏£‡∏ö‡∏ó‡∏∏‡∏Å‡∏™‡∏≤‡∏£‡∏≠‡∏≤‡∏´‡∏≤‡∏£.
+      <form class="searchbar" id="searchForm">
+        <label class="sr" for="q">§”§ÈπÀ“</label>
+        <input id="q" type="search" placeholder="æ‘¡æÏ™◊ËÕÕ“À“√/º≈‘µ¿—≥±Ï ‡™Ëπ yogurt, rice, chocolateÖ" autocomplete="off" />
+        <button id="btnSearch" type="submit">§ÈπÀ“</button>
+      </form>
+
+      <div class="options">
+        <span class="pill" title="®”π«πº≈≈—æ∏ÏµËÕÀπÈ“">º≈/ÀπÈ“
+          <select id="pageSize" style="background:transparent;border:0;color:inherit">
+            <option>10</option>
+            <option selected>20</option>
+            <option>50</option>
+          </select>
+        </span>
+        <span class="pill">ÀπË«¬µËÕ 100 g (µ“¡©≈“°)</span>
+      </div>
+
+      <div class="loader" id="loader">°”≈—ß§ÈπÀ“Ö</div>
+      <div class="empty" id="empty"></div>
+    </header>
+
+    <!-- ===== Results ===== -->
+    <section class="results" id="results" aria-live="polite"></section>
   </div>
+
+  <!-- ===== Footer (µ”·ÀπËß„ Ë‡§√¥‘µ≈Ë“ß ÿ¥) ===== -->
+  <footer>
+    <div class="container">
+      <div>·À≈Ëß¢ÈÕ¡Ÿ≈: OpenFoodFacts ( “∏“√≥–). §Ë“∑’Ë· ¥ß‡ªÁπ <em>per 100 g</em> ®“°©≈“°ºŸÈº≈‘µ Õ“®‰¡Ë§√∫∑ÿ° “√Õ“À“√</div>
+      <div class="credit-bottom" id="creditBottom"><!-- „ Ë‡§√¥‘µ≈Ë“ß ÿ¥∑’Ëπ’Ë¥È«¬ §√‘ªµÏ À√◊Õ≈∫ id ·≈È«æ‘¡æÏ‡Õß°Á‰¥È --></div>
+    </div>
+  </footer>
 
 <script>
 // ===== Config =====
 const API_SEARCH = 'https://world.openfoodfacts.org/cgi/search.pl';
 const IMG_FALLBACK = 'https://static.openfoodfacts.org/images/icons/dist/product-add.svg';
 
+/* ===== „ Ë‡§√¥‘µ¢Õß§ÿ≥∑’Ëπ’Ë (·°È∫√√∑—¥π’È) =====
+   µ—«Õ¬Ë“ß: "ºŸÈ®—¥∑”: §√Ÿ»—°¥‘Ï ‘∑∏‘Ï ∫”√ÿß | «‘∑¬“≈—¬Õ“™’«»÷°…“Ö | ? 2025"
+*/
+const CREDIT_TEXT = "ºŸÈ®—¥∑”: §√Ÿ»—°¥‘Ï ‘∑∏‘Ï  ∫”√ÿß | ·ºπ°«‘™“Õ“À“√·≈–‚¿™π“°“√ «‘∑¬“≈—¬Õ“™’«»÷°…“ ÿ‚¢∑—¬ | ? 2025"; // ?? ·°È∫√√∑—¥π’È
+
+// · ¥ß‡§√¥‘µ∑’Ë¥È“π∫π·≈–¥È“π≈Ë“ß (®–‰ª·∑π∑’Ë <div id="creditTop"> ·≈– <div id="creditBottom"> )
+window.addEventListener('DOMContentLoaded',()=>{
+  const top = document.getElementById('creditTop');
+  const bottom = document.getElementById('creditBottom');
+  if(top) top.textContent = CREDIT_TEXT;
+  if(bottom) bottom.textContent = CREDIT_TEXT;
+  document.getElementById('q').focus();
+});
+
 // ===== Helpers =====
 const $ = (sel)=>document.querySelector(sel);
 function fmt(num, digits=1){
-  if(num===undefined || num===null || Number.isNaN(num)) return '‚Äì';
+  if(num===undefined || num===null || Number.isNaN(num)) return 'ñ';
   return Number(num).toFixed(digits);
 }
 function makeChip(label, value, unit=''){
@@ -87,11 +160,11 @@ function makeChip(label, value, unit=''){
 
 // ===== Render Card =====
 function renderCard(p){
-  const n = p.product_name || p.generic_name || '(‡πÑ‡∏°‡πà‡∏°‡∏µ‡∏ä‡∏∑‡πà‡∏≠‡∏ú‡∏•‡∏¥‡∏ï‡∏†‡∏±‡∏ì‡∏ë‡πå)';
-  const brand = p.brands || '‚Äî';
+  const n = p.product_name || p.generic_name || '(‰¡Ë¡’™◊ËÕº≈‘µ¿—≥±Ï)';
+  const brand = p.brands || 'ó';
   const img = p.image_front_small_url || p.image_url || IMG_FALLBACK;
   const N = p.nutriments || {};
-  const energy = N['energy-kcal_100g'] ?? (N['energy_100g']? N['energy_100g']/4.184 : undefined); // fallback kcal
+  const energy = N['energy-kcal_100g'] ?? (N['energy_100g']? N['energy_100g']/4.184 : undefined); // kcal fallback
   const protein = N['proteins_100g'];
   const fat = N['fat_100g'];
   const carbs = N['carbohydrates_100g'];
@@ -105,19 +178,19 @@ function renderCard(p){
     <div class="imgwrap"><img alt="${n}" loading="lazy" src="${img}"></div>
     <div class="body">
       <h3 class="name">${n}</h3>
-      <div class="brand">‡∏¢‡∏µ‡πà‡∏´‡πâ‡∏≠/‡∏ú‡∏π‡πâ‡∏ú‡∏•‡∏¥‡∏ï: ${brand}</div>
+      <div class="brand">¬’ËÀÈÕ/ºŸÈº≈‘µ: ${brand}</div>
       <div class="nutri">
-        ${makeChip('‡∏û‡∏•‡∏±‡∏á‡∏á‡∏≤‡∏ô', fmt(energy), 'kcal')}
-        ${makeChip('‡πÇ‡∏õ‡∏£‡∏ï‡∏µ‡∏ô', fmt(protein), 'g')}
-        ${makeChip('‡πÑ‡∏Ç‡∏°‡∏±‡∏ô', fmt(fat), 'g')}
-        ${makeChip('‡∏Ñ‡∏≤‡∏£‡πå‡∏ö‡∏Ø', fmt(carbs), 'g')}
-        ${makeChip('‡∏ô‡πâ‡∏≥‡∏ï‡∏≤‡∏•', fmt(sugars), 'g')}
-        ${makeChip('‡πÉ‡∏¢‡∏≠‡∏≤‡∏´‡∏≤‡∏£', fmt(fiber), 'g')}
-        ${makeChip('‡πÇ‡∏ã‡πÄ‡∏î‡∏µ‡∏¢‡∏°', sodium!=null?fmt(sodium*1000):'‚Äì', 'mg')}
-        ${makeChip('‡πÄ‡∏Å‡∏•‡∏∑‡∏≠', fmt(salt), 'g')}
+        ${makeChip('æ≈—ßß“π', fmt(energy), 'kcal')}
+        ${makeChip('‚ª√µ’π', fmt(protein), 'g')}
+        ${makeChip('‰¢¡—π', fmt(fat), 'g')}
+        ${makeChip('§“√Ï∫œ', fmt(carbs), 'g')}
+        ${makeChip('πÈ”µ“≈', fmt(sugars), 'g')}
+        ${makeChip('„¬Õ“À“√', fmt(fiber), 'g')}
+        ${makeChip('‚´‡¥’¬¡', sodium!=null?fmt(sodium*1000):'ñ', 'mg')}
+        ${makeChip('‡°≈◊Õ', fmt(salt), 'g')}
       </div>
       <div class="muted" style="margin-top:10px">
-        ‡∏£‡∏´‡∏±‡∏™‡∏ö‡∏≤‡∏£‡πå‡πÇ‡∏Ñ‡πâ‡∏î: ${p.code || '‚Äî'} ¬∑ ‡∏õ‡∏£‡∏∞‡πÄ‡∏ó‡∏®: ${p.countries || '‚Äî'}
+        √À— ∫“√Ï‚§È¥: ${p.code || 'ó'} ? ª√–‡∑»: ${p.countries || 'ó'}
       </div>
     </div>
   </article>`;
@@ -143,14 +216,14 @@ async function searchFoods(q, pageSize=20){
     const products = (data.products||[]).filter(p=>p.nutriments);
 
     if(products.length===0){
-      $('#empty').textContent='‡πÑ‡∏°‡πà‡∏û‡∏ö‡∏Ç‡πâ‡∏≠‡∏°‡∏π‡∏• ‡∏•‡∏≠‡∏á‡πÉ‡∏ä‡πâ‡∏Ñ‡∏≥‡∏Ñ‡πâ‡∏ô‡∏≠‡∏∑‡πà‡∏ô (‡πÄ‡∏ä‡πà‡∏ô ‡∏†‡∏≤‡∏©‡∏≤‡∏≠‡∏±‡∏á‡∏Å‡∏§‡∏©/‡∏ó‡∏±‡πà‡∏ß‡πÑ‡∏õ)';
+      $('#empty').textContent='‰¡Ëæ∫¢ÈÕ¡Ÿ≈ ≈Õß„™È§”§ÈπÕ◊Ëπ (‡™Ëπ ¿“…“Õ—ß°ƒ…/∑—Ë«‰ª)';
       return;
     }
     const html = products.map(renderCard).join('');
     $('#results').innerHTML = html;
   }catch(err){
     console.error(err);
-    $('#empty').textContent='‡πÄ‡∏Å‡∏¥‡∏î‡∏Ç‡πâ‡∏≠‡∏ú‡∏¥‡∏î‡∏û‡∏•‡∏≤‡∏î‡πÉ‡∏ô‡∏Å‡∏≤‡∏£‡∏î‡∏∂‡∏á‡∏Ç‡πâ‡∏≠‡∏°‡∏π‡∏• ‡∏Å‡∏£‡∏∏‡∏ì‡∏≤‡∏•‡∏≠‡∏á‡πÉ‡∏´‡∏°‡πà‡∏≠‡∏µ‡∏Å‡∏Ñ‡∏£‡∏±‡πâ‡∏á';
+    $('#empty').textContent='‡°‘¥¢ÈÕº‘¥æ≈“¥„π°“√¥÷ß¢ÈÕ¡Ÿ≈ °√ÿ≥“≈Õß„À¡ËÕ’°§√—Èß';
   }finally{
     $('#loader').style.display='none';
   }
@@ -162,16 +235,11 @@ form.addEventListener('submit', (e)=>{
   e.preventDefault();
   const q = $('#q').value.trim();
   if(!q){
-    $('#empty').textContent='‡πÇ‡∏õ‡∏£‡∏î‡∏û‡∏¥‡∏°‡∏û‡πå‡∏Ñ‡∏≥‡∏Ñ‡πâ‡∏ô‡∏´‡∏≤';
+    $('#empty').textContent='‚ª√¥æ‘¡æÏ§”§ÈπÀ“';
     return;
   }
   const pageSize = Number($('#pageSize').value || 20);
   searchFoods(q, pageSize);
-});
-
-// Enter to search immediately on first load focus
-window.addEventListener('DOMContentLoaded',()=>{
-  $('#q').focus();
 });
 </script>
 </body>
