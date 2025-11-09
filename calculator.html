@@ -1,220 +1,240 @@
 <!DOCTYPE html>
-<html lang="th">
+<html lang="th" data-theme="light">
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Nutrition Calculator | คำนวณโภชนาการจากสูตรอาหาร</title>
-<meta name="description" content="คำนวณคุณค่าทางโภชนาการจากวัตถุดิบ รองรับ yield/retention + Export CSV/XLSX" />
+<title>Nutrition Calculator • Dashboard</title>
+<meta name="description" content="คำนวณโภชนาการจากสูตรอาหาร รองรับ yield/retention • Export CSV/XLSX" />
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.2/dist/confetti.browser.min.js"></script>
 <style>
 :root{
-  --bg:#F6F8FC; --text:#111827; --muted:#6B7280; --card:#FFFFFF; --border:#E5E9F2;
+  --bg:#F6F8FC; --card:#FFFFFF; --text:#111827; --muted:#6B7280; --border:#E5E9F2;
   --accent:#0EA5E9; --danger:#EF4444; --chip:#F3F6FB; --chip-border:#E5EBF4;
-  --radius:18px; --shadow:0 10px 30px rgba(17,24,39,.08);
+  --radius:20px; --shadow:0 14px 36px rgba(17,24,39,.10);
+}
+[data-theme="dark"]{
+  --bg:#0B1220; --card:#111827; --text:#E6EAF2; --muted:#9AA3B2; --border:#1E2637;
+  --accent:#60C6F2; --danger:#F87171; --chip:#0F172A; --chip-border:#21304F;
 }
 *{box-sizing:border-box} html,body{height:100%}
 body{margin:0;font-family:Inter,system-ui,Segoe UI,Roboto,Arial;background:var(--bg);color:var(--text)}
-.topbar{position:sticky;top:0;z-index:10;background:#fffcc000; backdrop-filter: blur(8px); border-bottom:1px solid var(--border)}
+.layout{display:grid;grid-template-columns:260px 1fr;min-height:100vh}
+.aside{background:#111827;color:#cbd5e1;display:flex;flex-direction:column;gap:14px;padding:18px 16px;position:sticky;top:0;height:100vh}
+.brand{display:flex;align-items:center;gap:10px}
+.brand .dot{width:12px;height:12px;border-radius:999px;background:var(--accent)}
+.brand .name{color:#fff;font-weight:800}
+.menu a{display:flex;gap:10px;align-items:center;padding:10px 12px;border-radius:14px;color:#cbd5e1;text-decoration:none;font-weight:600}
+.menu a.active,.menu a:hover{background:rgba(255,255,255,.08);color:#fff}
+.footer-mini{margin-top:auto;font-size:12px;color:#94a3b8}
+
+.topbar{position:sticky;top:0;z-index:10;background:transparent;backdrop-filter: blur(6px);margin-bottom:10px}
 .container{max-width:1100px;margin:0 auto;padding:0 20px}
-.topbar .wrap{display:flex;align-items:center;gap:14px;min-height:66px}
-.logo{display:inline-flex;align-items:center;gap:10px;text-decoration:none;color:inherit}
-.logo .dot{width:12px;height:12px;border-radius:999px;background:var(--accent)}
-.title{font-weight:800;font-size:18px;letter-spacing:.2px}
+.topbar .wrap{display:flex;align-items:center;gap:10px;min-height:66px}
 .credit-top{margin-left:auto;font-size:13px;color:var(--muted)}
-.theme-btn{margin-left:8px;border:1px solid var(--border);background:var(--card);color:var(--text);padding:8px 10px;border-radius:12px;cursor:pointer}
-.brandstrip{display:flex;gap:16px;align-items:center;flex-wrap:wrap;margin:14px 0}
-.brandstrip img{height:40px;object-fit:contain}
-
-.hero{padding:28px 0 10px}
-.hero h1{font-size:clamp(26px,3.2vw,40px);margin:6px 0 10px}
-.hero .sub{margin:0;color:var(--muted)}
-.row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
-.btn{display:inline-flex;align-items:center;gap:8px;border:1px solid var(--border);background:var(--card);color:var(--text);padding:10px 12px;border-radius:12px;cursor:pointer;text-decoration:none}
-.btn:hover{transform:translateY(-1px)}
+.theme-btn,.btn{border:1px solid var(--border);background:var(--card);color:var(--text);padding:12px 14px;border-radius:14px;cursor:pointer;text-decoration:none;font-weight:700}
 .btn.primary{background:var(--accent);color:#fff;border:0}
+.btn.danger{background:var(--danger);color:#fff;border:0}
+.btn{transition:transform .15s ease, box-shadow .15s ease} .btn:hover{transform:translateY(-1px)}
+.btn, .btn-ghost, .theme-btn { position: relative; overflow: hidden; }
+.ripple{position:absolute;transform:scale(0);border-radius:50%;background:rgba(255,255,255,.45);animation:ripple .6s linear;pointer-events:none}
+@keyframes ripple{to{transform:scale(4);opacity:0}}
 
-.card{background:var(--card);border:1px solid var(--border);border-radius:20px;box-shadow:var(--shadow)}
-.section{padding:14px 16px}
+.main{padding:10px 0 24px}
+.brandstrip{display:flex;gap:16px;align-items:center;flex-wrap:wrap;margin:6px 0 12px}
+.brandstrip img{height:40px;object-fit:contain}
+.card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow)}
+.section{padding:16px 16px}
+.hero h1{font-size:clamp(26px,3.2vw,40px);margin:0 0 6px}
+.sub{margin:0;color:var(--muted)}
+.row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
 .grid{display:grid;gap:12px}
-.grid.cols-2{grid-template-columns:1fr 1fr}
-.grid.cols-3{grid-template-columns:1fr 1fr 1fr}
-input, select{ width:100%;padding:12px;border-radius:12px;border:1px solid var(--border);background:var(--card);color:var(--text) }
-label{font-size:13px;color:var(--muted)}
-.table{width:100%;border-collapse:separate;border-spacing:0;border:1px solid var(--border);border-radius:14px;overflow:hidden}
-.table th,.table td{padding:8px 10px;border-bottom:1px solid var(--border);text-align:left;background:var(--card);vertical-align:middle}
+.cols-3{grid-template-columns:1fr 1fr 1fr}
+.cols-2{grid-template-columns:1fr 1fr}
+input,select{width:100%;padding:12px;border-radius:14px;border:1px solid var(--border);background:var(--card);color:var(--text)}
+.table{width:100%;border-collapse:separate;border-spacing:0;border:1px solid var(--border);border-radius:16px;overflow:auto}
+.table th,.table td{padding:10px;border-bottom:1px solid var(--border);text-align:left;vertical-align:middle;background:var(--card)}
 .table th{font-size:12px;color:var(--muted)}
 .chip{background:var(--chip);border:1px solid var(--chip-border);border-radius:12px;padding:10px 12px;font-size:13px;display:flex;justify-content:space-between;gap:8px}
 .nutri-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:10px}
 .muted{color:var(--muted)}
-footer{border-top:1px solid var(--border);padding:18px 0 40px;color:var(--muted);font-size:13px;margin-top:26px}
+footer{border-top:1px solid var(--border);padding:18px 0 40px;color:var(--muted);font-size:13px}
+#toast{position:fixed;right:16px;bottom:16px;z-index:9999;display:none}
+.toast{background:#111827;color:#fff;padding:10px 14px;border-radius:14px;box-shadow:0 10px 30px rgba(0,0,0,.2);margin-top:8px;opacity:.98}
+@media (max-width:980px){ .layout{grid-template-columns:1fr} .aside{height:auto;position:relative;border-bottom:1px solid #0f172a} }
 </style>
 </head>
 <body>
-  <div class="topbar">
+<div class="layout">
+  <aside class="aside">
+    <div class="brand"><span class="dot"></span> <span class="name">Nutrition Tools</span></div>
+    <nav class="menu">
+      <a href="index.html">🔎 ค้นหาข้อมูล</a>
+      <a class="active" href="calculator.html">🧮 เครื่องคิดโภชนาการ</a>
+      <a href="https://world.openfoodfacts.org/" target="_blank" rel="noopener">🌐 OpenFoodFacts</a>
+    </nav>
+    <div class="footer-mini">© 2025 TA CHANNEL • Better, Faster, Cheaper</div>
+  </aside>
+
+  <main class="main">
+    <div id="toast"></div>
+
+    <div class="topbar">
+      <div class="container">
+        <div class="wrap">
+          <div class="credit-top" id="creditTop"></div>
+          <button class="theme-btn" id="themeToggle">สลับธีม</button>
+        </div>
+      </div>
+    </div>
+
     <div class="container">
-      <div class="wrap">
-        <a class="logo" href="index.html" aria-label="Home"><span class="dot"></span><span class="title">Nutrition Calculator</span></a>
-        <div class="credit-top" id="creditTop"></div>
-        <button class="theme-btn" id="themeToggle">สลับธีม</button>
+      <div class="brandstrip">
+        <img id="logo1" alt="สถาบัน 1"><img id="logo2" alt="สถาบัน 2"><img id="logo3" alt="สถาบัน 3">
       </div>
-    </div>
-  </div>
 
-  <div class="container">
-    <div class="brandstrip">
-      <img id="logo1" alt="สถาบัน 1">
-      <img id="logo2" alt="สถาบัน 2">
-      <img id="logo3" alt="สถาบัน 3">
-    </div>
-
-    <header class="hero">
-      <h1>คำนวณโภชนาการจากสูตรอาหาร</h1>
-      <p class="sub">ใส่รายการวัตถุดิบและน้ำหนักดิบ (g) ระบบจะคำนวณสารอาหารรวม แล้วแปลงเป็นค่า <strong>ต่อ 100 g</strong> และ <strong>ต่อ serving</strong> · รองรับ <em>yield</em> และ <em>retention</em> ต่อสารอาหาร</p>
-      <div class="row">
-        <a class="btn" href="index.html">← กลับหน้าค้นหา</a>
-        <a class="btn" href="data/ingredients.json" target="_blank" rel="noopener">ดูฐานข้อมูล (JSON)</a>
-        <button class="btn" id="btnExportResults">Export ผลลัพธ์ (CSV)</button>
-        <button class="btn" id="btnExportResultsXLSX">Export ผลลัพธ์ (XLSX)</button>
-        <button class="btn" id="btnExportIngs">Export วัตถุดิบ (CSV)</button>
-        <button class="btn" id="btnExportIngsXLSX">Export วัตถุดิบ (XLSX)</button>
-      </div>
-    </header>
-
-    <div class="card section" style="margin-bottom:14px">
-      <div class="grid cols-3">
-        <div>
-          <label>ขนาดหนึ่งหน่วยบริโภค (serving size, g)</label>
-          <input id="servingSize" type="number" step="0.1" placeholder="เช่น 150">
-        </div>
-        <div>
-          <label>จำนวนหน่วยต่อบรรจุภัณฑ์</label>
-          <input id="servingsPerPack" type="number" step="0.1" placeholder="เช่น 3">
-        </div>
-        <div>
-          <label>ตำแหน่งทศนิยม (การปัด)</label>
-          <select id="roundDp"><option value="0">0</option><option value="1" selected>1</option><option value="2">2</option></select>
+      <div class="card section hero">
+        <h1>คำนวณโภชนาการจากสูตรอาหาร</h1>
+        <p class="sub">ใส่รายการวัตถุดิบและน้ำหนักดิบ (g) ระบบจะคำนวณสารอาหารรวม แล้วแปลงเป็นค่า <strong>ต่อ 100 g</strong> และ <strong>ต่อ serving</strong> · รองรับ <em>yield</em> และ <em>retention</em> ต่อสารอาหาร</p>
+        <div class="row" style="margin-top:8px">
+          <a class="btn" href="index.html">← กลับหน้าค้นหา</a>
+          <a class="btn" href="data/ingredients.json" target="_blank" rel="noopener">ดูฐานข้อมูล (JSON)</a>
+          <button class="btn" id="btnExportResults">Export ผลลัพธ์ (CSV)</button>
+          <button class="btn" id="btnExportResultsXLSX">Export ผลลัพธ์ (XLSX)</button>
+          <button class="btn" id="btnExportIngs">Export วัตถุดิบ (CSV)</button>
+          <button class="btn" id="btnExportIngsXLSX">Export วัตถุดิบ (XLSX)</button>
         </div>
       </div>
 
-      <div class="grid cols-3" style="margin-top:10px">
-        <div>
-          <label>ค้นหาวัตถุดิบจากฐานข้อมูล</label>
-          <input id="searchIngredient" type="text" placeholder="พิมพ์เพื่อค้น เช่น ข้าวสวยหุงสุก, chicken, น้ำปลา" list="ing-list">
+      <div class="card section" style="margin-top:12px">
+        <div class="grid cols-3">
+          <div><label>ขนาดหนึ่งหน่วยบริโภค (g)</label><input id="servingSize" type="number" step="0.1" placeholder="เช่น 150"></div>
+          <div><label>จำนวนหน่วยต่อบรรจุภัณฑ์</label><input id="servingsPerPack" type="number" step="0.1" placeholder="เช่น 3"></div>
+          <div><label>ตำแหน่งทศนิยม (การปัด)</label><select id="roundDp"><option value="0">0</option><option value="1" selected>1</option><option value="2">2</option></select></div>
         </div>
-        <div class="row">
-          <button class="btn" id="btnAdd">+ เพิ่มแถว</button>
-          <button class="btn" id="btnClear">ล้างตาราง</button>
-          <button class="btn" id="btnSample">ใส่ตัวอย่าง</button>
+
+        <div class="grid cols-3" style="margin-top:10px">
+          <div><label>ค้นหาวัตถุดิบจากฐานข้อมูล</label><input id="searchIngredient" type="text" placeholder="พิมพ์เพื่อค้น เช่น ข้าวสวยหุงสุก, chicken, น้ำปลา" list="ing-list"></div>
+          <div class="row">
+            <button class="btn" id="btnAdd">+ เพิ่มแถว</button>
+            <button class="btn" id="btnClear">ล้างตาราง</button>
+            <button class="btn" id="btnSample">ใส่ตัวอย่าง</button>
+          </div>
+        </div>
+        <p class="muted" style="margin-top:8px">พรีเซ็ตวิธีปรุงเป็นค่าประมาณเพื่อสาธิต/สอน — ปรับตามบริบทจริงได้</p>
+      </div>
+
+      <datalist id="ing-list"></datalist>
+
+      <div class="card section" style="margin-top:12px;overflow:auto">
+        <table class="table" id="ingTable">
+          <thead>
+            <tr>
+              <th style="min-width:200px">ชื่อวัตถุดิบ</th>
+              <th style="min-width:150px">วิธีปรุง (พรีเซ็ต)</th>
+              <th style="min-width:120px">น้ำหนักดิบ (g)</th>
+              <th style="min-width:110px">Yield</th>
+              <th style="min-width:130px">Ret. โปรตีน</th>
+              <th style="min-width:120px">Ret. ไขมัน</th>
+              <th style="min-width:130px">Ret. คาร์บ</th>
+              <th style="min-width:140px">Ret. ใยอาหาร</th>
+              <th style="min-width:130px">Ret. โซเดียม</th>
+              <th style="min-width:60px"></th>
+            </tr>
+          </thead>
+          <tbody id="ingBody"></tbody>
+        </table>
+      </div>
+
+      <div class="card section" style="margin-top:12px">
+        <div class="grid cols-2">
+          <div>
+            <h3 style="margin:6px 0">ผลรวมทั้งจาน (หลังปรับ yield & retention)</h3>
+            <div class="nutri-grid" id="totalsGrid"></div>
+          </div>
+          <div>
+            <h3 style="margin:6px 0">แปลงผลลัพธ์</h3>
+            <div class="nutri-grid" id="convertGrid"></div>
+          </div>
         </div>
       </div>
-      <p class="muted" style="margin-top:8px">พรีเซ็ตวิธีปรุงเป็นค่าประมาณเพื่อสาธิต/สอน — ปรับตามบริบทจริงได้</p>
-    </div>
 
-    <datalist id="ing-list"></datalist>
-
-    <div class="card section" style="margin-bottom:14px; overflow:auto">
-      <table class="table" id="ingTable">
-        <thead>
-          <tr>
-            <th style="min-width:200px">ชื่อวัตถุดิบ</th>
-            <th style="min-width:150px">วิธีปรุง (พรีเซ็ต)</th>
-            <th style="min-width:120px">น้ำหนักดิบ (g)</th>
-            <th style="min-width:110px">Yield</th>
-            <th style="min-width:130px">Ret. โปรตีน</th>
-            <th style="min-width:120px">Ret. ไขมัน</th>
-            <th style="min-width:130px">Ret. คาร์บ</th>
-            <th style="min-width:140px">Ret. ใยอาหาร</th>
-            <th style="min-width:130px">Ret. โซเดียม</th>
-            <th style="min-width:60px"></th>
-          </tr>
-        </thead>
-        <tbody id="ingBody"></tbody>
-      </table>
-    </div>
-
-    <div class="card section">
-      <div class="grid cols-2">
-        <div>
-          <h3 style="margin:6px 0">ผลรวมทั้งจาน (หลังปรับ yield & retention)</h3>
-          <div class="nutri-grid" id="totalsGrid"></div>
-        </div>
-        <div>
-          <h3 style="margin:6px 0">แปลงผลลัพธ์</h3>
-          <div class="nutri-grid" id="convertGrid"></div>
-        </div>
+      <div class="card section" style="margin-top:12px">
+        <h3 style="margin:6px 0">ตรวจทานมวลรวม (ใกล้ 100 g ต่อ 100 g)</h3>
+        <div class="muted" id="massCheck"></div>
       </div>
-    </div>
 
-    <div class="card section" style="margin-top:14px">
-      <h3 style="margin:6px 0">ตรวจทานมวลรวม (ใกล้ 100 g ต่อ 100 g)</h3>
-      <div class="muted" id="massCheck"></div>
+      <footer style="margin-top:18px">
+        <div>อ้างอิง: Atwater factors (พลังงาน) + แนวคิด yield/retention</div>
+        <div id="creditBottom"></div>
+      </footer>
     </div>
-  </div>
-
-  <footer>
-    <div class="container">
-      <div>อ้างอิง: Atwater factors (พลังงาน) + แนวคิด yield/retention</div>
-      <div id="creditBottom"></div>
-    </div>
-  </footer>
+  </main>
+</div>
 
 <script>
-/* เครดิต/โลโก้/ธีม */
-const CREDIT_TEXT = "ผู้จัดทำ: ครูศักดิ์สิทธิ์ บำรุง | แผนกวิชาอาหารและโภชนาการ วิทยาลัยอาชีวศึกษาสุโขทัย | © 2025";
-const LOGOS = ["assets/img/logo1.png","assets/img/logo2.png","assets/img/logo3.png"];
-const root = document.documentElement;
-function applyTheme(t){ root.setAttribute('data-theme', t); localStorage.setItem('nf-theme', t); }
-function toggleTheme(){ const cur = localStorage.getItem('nf-theme')||'light'; applyTheme(cur==='light'?'dark':'light'); }
-(function initTheme(){ applyTheme(localStorage.getItem('nf-theme')||'light'); })();
-document.getElementById('themeToggle').addEventListener('click', toggleTheme);
-function safeSetLogo(id, src){ const el=document.getElementById(id); if(!el) return; el.onerror=()=>{el.style.display='none'}; if(src) el.src=src; }
+/* Credit/Logo/Theme */
+const CREDIT_TEXT="ผู้จัดทำ: ครูศักดิ์สิทธิ์ บำรุง | แผนกวิชาอาหารและโภชนาการ วิทยาลัยอาชีวศึกษาสุโขทัย | © 2025";
+const LOGOS=["assets/img/logo1.png","assets/img/logo2.png","assets/img/logo3.png"];
+const root=document.documentElement;
+function applyTheme(t){root.setAttribute('data-theme',t);localStorage.setItem('nf-theme',t);}
+function toggleTheme(){const cur=localStorage.getItem('nf-theme')||'light';applyTheme(cur==='light'?'dark':'light');}
+(function(){applyTheme(localStorage.getItem('nf-theme')||'light');})();
+document.getElementById('themeToggle').addEventListener('click',toggleTheme);
+function safeSetLogo(id,src){const el=document.getElementById(id);if(!el)return;el.onerror=()=>{el.style.display='none'};if(src)el.src=src;}
+function attachRipple(sel='.btn, .theme-btn'){document.querySelectorAll(sel).forEach(b=>{
+  b.addEventListener('click',function(e){const r=document.createElement('span');const d=Math.max(this.clientWidth,this.clientHeight);
+    r.className='ripple';r.style.width=r.style.height=d+'px';const rect=this.getBoundingClientRect();
+    r.style.left=(e.clientX-rect.left-d/2)+'px';r.style.top=(e.clientY-rect.top-d/2)+'px';this.appendChild(r);setTimeout(()=>r.remove(),600);});});}
+function showToast(msg){const box=document.getElementById('toast');const el=document.createElement('div');el.className='toast';el.textContent=msg;box.appendChild(el);box.style.display='block';
+  setTimeout(()=>{el.style.opacity='0';el.style.transform='translateY(6px)';},1600);
+  setTimeout(()=>{el.remove();if(!box.children.length) box.style.display='none';},2100);}
 
-/* พรีเซ็ตวิธีปรุง (ค่าประมาณ) */
-const PRESETS = {
-  'ไม่มี/ดิบ':    { yld:1.00, rp:1.00, rf:1.00, rc:1.00, rfi:1.00, rna:1.00 },
-  'ต้ม/ลวก/ตุ๋น': { yld:0.95, rp:0.95, rf:0.98, rc:0.95, rfi:0.90, rna:1.00 },
-  'นึ่ง':         { yld:0.98, rp:0.97, rf:0.99, rc:0.97, rfi:0.92, rna:1.00 },
-  'ผัด':          { yld:0.90, rp:0.95, rf:1.05, rc:0.95, rfi:0.90, rna:1.00 },
-  'ทอด':          { yld:0.80, rp:0.93, rf:1.10, rc:0.90, rfi:0.85, rna:1.00 },
-  'ย่าง/อบ':      { yld:0.80, rp:0.95, rf:1.00, rc:0.95, rfi:0.90, rna:1.00 }
-};
-
-/* โหลดฐานข้อมูลวัตถุดิบ */
-let DB=[];
-async function loadDB(){
-  try{ const r=await fetch('data/ingredients.json',{cache:'no-store'}); if(r.ok){ DB=await r.json(); return; } }catch(e){}
-  try{ const r2=await fetch('data/ingredients.csv',{cache:'no-store'}); if(r2.ok){ const text=await r2.text(); DB=parseCSV(text); return; } }catch(e){}
-  DB=[{name:'ข้าวสวยหุงสุก',state:'cooked',protein:2.6,fat:0.3,carbs:28,fiber:0.4,sodium_mg:2},{name:'อกไก่ดิบ',state:'raw',protein:21,fat:2.5,carbs:0,fiber:0,sodium_mg:70}];
-}
-function parseCSV(csv){ const lines=csv.trim().split(/\r?\n/); const head=lines.shift().split(','); const idx=k=>head.indexOf(k); const out=[]; for(const l of lines){ if(!l.trim()) continue; const c=l.split(','); out.push({name:(c[idx('name')]||'').trim(),state:(c[idx('state')]||'').trim(),protein:Number(c[idx('protein')]||0),fat:Number(c[idx('fat')]||0),carbs:Number(c[idx('carbs')]||0),fiber:Number(c[idx('fiber')]||0),sodium_mg:Number(c[idx('sodium_mg')]||0)});} return out; }
-
-/* DOM */
-const $=s=>document.querySelector(s);
-const ingBody=$('#ingBody'), searchBox=$('#searchIngredient'), roundDp=$('#roundDp'), servingSize=$('#servingSize'), servingsPerPack=$('#servingsPerPack'), totalsGrid=$('#totalsGrid'), convertGrid=$('#convertGrid'), massCheck=$('#massCheck');
-
-window.addEventListener('DOMContentLoaded', async ()=>{
+window.addEventListener('DOMContentLoaded',async()=>{
   const [l1,l2,l3]=LOGOS; safeSetLogo('logo1',l1); safeSetLogo('logo2',l2); safeSetLogo('logo3',l3);
-  document.getElementById('creditTop').textContent=CREDIT_TEXT;
-  document.getElementById('creditBottom').textContent=CREDIT_TEXT;
-
-  await loadDB();
-  document.getElementById('ing-list').innerHTML = DB.map(d=>`<option value="${d.name}">`).join('');
-  addRow(); compute();
+  document.getElementById('creditTop').textContent=CREDIT_TEXT; document.getElementById('creditBottom').textContent=CREDIT_TEXT;
+  await loadDB(); document.getElementById('ing-list').innerHTML=DB.map(d=>`<option value="${d.name}">`).join('');
+  addRow(); compute(); attachRipple();
 });
 
-/* Utils */
-function r(v,dp){ const n=Number(v); if(!isFinite(n)) return 0; const f=Math.pow(10,dp); return Math.round(n*f)/f; }
-function kcal(p,c,f,sa=0){ return (4*p)+(4*c)+(9*f)+(2.4*sa); }
-function saltFromSodium_g(na_g){ return na_g*2.5; }
+/* Presets (approximate demo) */
+const PRESETS={
+  'ไม่มี/ดิบ':{yld:1.00,rp:1.00,rf:1.00,rc:1.00,rfi:1.00,rna:1.00},
+  'ต้ม/ลวก/ตุ๋น':{yld:0.95,rp:0.95,rf:0.98,rc:0.95,rfi:0.90,rna:1.00},
+  'นึ่ง':{yld:0.98,rp:0.97,rf:0.99,rc:0.97,rfi:0.92,rna:1.00},
+  'ผัด':{yld:0.90,rp:0.95,rf:1.05,rc:0.95,rfi:0.90,rna:1.00},
+  'ทอด':{yld:0.80,rp:0.93,rf:1.10,rc:0.90,rfi:0.85,rna:1.00},
+  'ย่าง/อบ':{yld:0.80,rp:0.95,rf:1.00,rc:0.95,rfi:0.90,rna:1.00}
+};
 
-/* ตารางวัตถุดิบ */
-function addRow(prefill){
-  const tr=document.createElement('tr');
-  tr.innerHTML=`
-    <td><input class="ing-name" list="ing-list" placeholder="ชื่อวัตถุดิบ" value="${prefill?.name||''}"></td>
+/* Load DB (JSON or CSV fallback) */
+let DB=[];
+async function loadDB(){
+  try{const r=await fetch('data/ingredients.json',{cache:'no-store'});if(r.ok){DB=await r.json();return;}}catch(e){}
+  try{const r2=await fetch('data/ingredients.csv',{cache:'no-store'});if(r2.ok){const txt=await r2.text();DB=parseCSV(txt);return;}}catch(e){}
+  DB=[{name:'ข้าวสวยหุงสุก',state:'cooked',protein:2.6,fat:0.3,carbs:28,fiber:0.4,sodium_mg:2},
+      {name:'อกไก่ดิบ',state:'raw',protein:21,fat:2.5,carbs:0,fiber:0,sodium_mg:70},
+      {name:'น้ำปลา',state:'liquid',protein:0,fat:0,carbs:0,fiber:0,sodium_mg:7000}];
+}
+function parseCSV(csv){const lines=csv.trim().split(/\r?\n/);const head=lines.shift().split(',');const id=k=>head.indexOf(k);const out=[];
+  for(const l of lines){if(!l.trim())continue;const c=l.split(',');
+    out.push({name:(c[id('name')]||'').trim(),state:(c[id('state')]||'').trim(),protein:Number(c[id('protein')]||0),
+      fat:Number(c[id('fat')]||0),carbs:Number(c[id('carbs')]||0),fiber:Number(c[id('fiber')]||0),sodium_mg:Number(c[id('sodium_mg')]||0)});} return out; }
+
+/* DOM refs */
+const $=s=>document.querySelector(s); const ingBody=$('#ingBody'), roundDp=$('#roundDp'), servingSize=$('#servingSize'), servingsPerPack=$('#servingsPerPack');
+
+/* Helpers */
+function r(v,dp){const n=Number(v); if(!isFinite(n)) return 0; const f=10**dp; return Math.round(n*f)/f;}
+function kcal(p,c,f,sa=0){return (4*p)+(4*c)+(9*f)+(2.4*sa);}
+function saltFromSodium_g(na_g){return na_g*2.5;}
+
+/* Table ops */
+function addRow(prefill){const tr=document.createElement('tr');
+  tr.innerHTML=`<td><input class="ing-name" list="ing-list" placeholder="ชื่อวัตถุดิบ" value="${prefill?.name||''}"></td>
     <td><select class="ing-method">${Object.keys(PRESETS).map(k=>`<option ${prefill?.method===k?'selected':''}>${k}</option>`).join('')}</select></td>
     <td><input class="ing-raw" type="number" step="0.1" placeholder="g" value="${prefill?.raw||''}"></td>
     <td><input class="ing-yield" type="number" step="0.01" placeholder="0.85" value="${prefill?.yld??1}"></td>
@@ -223,20 +243,20 @@ function addRow(prefill){
     <td><input class="ing-ret-c" type="number" step="0.01" placeholder="0.90" value="${prefill?.rc??1}"></td>
     <td><input class="ing-ret-fi" type="number" step="0.01" placeholder="0.90" value="${prefill?.rfi??1}"></td>
     <td><input class="ing-ret-na" type="number" step="0.01" placeholder="1.00" value="${prefill?.rna??1}"></td>
-    <td><button class="btn btn-del">ลบ</button></td>`;
+    <td><button class="btn danger btn-del">ลบ</button></td>`;
   ingBody.appendChild(tr);
   tr.querySelector('.btn-del').addEventListener('click',()=>{tr.remove(); compute();});
   ['ing-name','ing-raw','ing-yield','ing-ret-p','ing-ret-f','ing-ret-c','ing-ret-fi','ing-ret-na'].forEach(cls=> tr.querySelector('.'+cls).addEventListener('input', compute));
   tr.querySelector('.ing-method').addEventListener('change',()=>{
     const p=PRESETS[tr.querySelector('.ing-method').value]; if(!p) return;
-    tr.querySelector('.ing-yield').value=p.yld; tr.querySelector('.ing-ret-p').value=p.rp; tr.querySelector('.ing-ret-f').value=p.rf; tr.querySelector('.ing-ret-c').value=p.rc; tr.querySelector('.ing-ret-fi').value=p.rfi; tr.querySelector('.ing-ret-na').value=p.rna; compute();
+    tr.querySelector('.ing-yield').value=p.yld; tr.querySelector('.ing-ret-p').value=p.rp; tr.querySelector('.ing-ret-f').value=p.rf;
+    tr.querySelector('.ing-ret-c').value=p.rc; tr.querySelector('.ing-ret-fi').value=p.rfi; tr.querySelector('.ing-ret-na').value=p.rna; compute();
   });
 }
 document.getElementById('btnAdd').addEventListener('click',()=>addRow());
 document.getElementById('btnClear').addEventListener('click',()=>{ingBody.innerHTML=''; compute();});
 document.getElementById('btnSample').addEventListener('click',()=>{
-  ingBody.innerHTML='';
-  addRow({name:'ข้าวสวยหุงสุก',method:'ไม่มี/ดิบ',raw:300,yld:1,rp:1,rf:1,rc:1,rfi:1,rna:1});
+  ingBody.innerHTML=''; addRow({name:'ข้าวสวยหุงสุก',method:'ไม่มี/ดิบ',raw:300,yld:1,rp:1,rf:1,rc:1,rfi:1,rna:1});
   addRow({name:'อกไก่ดิบ',method:'ย่าง/อบ',raw:200,yld:0.8,rp:0.95,rf:1,rc:0.95,rfi:0.9,rna:1});
   addRow({name:'น้ำปลา',method:'ไม่มี/ดิบ',raw:15,yld:1,rp:1,rf:1,rc:1,rfi:1,rna:1});
   servingSize.value=150; servingsPerPack.value=4; roundDp.value=1; compute();
@@ -247,7 +267,7 @@ document.getElementById('searchIngredient').addEventListener('change',()=>{
 });
 [roundDp,servingSize,servingsPerPack].forEach(el=>el.addEventListener('input', compute));
 
-/* คำนวณ */
+/* Compute */
 function compute(){
   const dp=Number(roundDp.value||1);
   let totalProtein=0,totalFat=0,totalCarb=0,totalFiber=0,totalSodium_mg=0,totalCookedWeight=0;
@@ -262,6 +282,7 @@ function compute(){
     const rfi=Number(tr.querySelector('.ing-ret-fi').value||1);
     const rna=Number(tr.querySelector('.ing-ret-na').value||1);
     if(!raw||raw<=0) return;
+
     const base=DB.find(d=>d.name===name);
     const P100=base?.protein??0,F100=base?.fat??0,C100=base?.carbs??0,FI100=base?.fiber??0,NA100=base?.sodium_mg??0;
 
@@ -270,8 +291,7 @@ function compute(){
     totalProtein+=p*rp; totalFat+=f*rf; totalCarb+=c*rc; totalFiber+=fi*rfi; totalSodium_mg+=na_mg*rna;
   });
 
-  const FW=totalCookedWeight;  // น้ำหนักสุทธิหลังปรุงจากผลรวม cooked weight
-  const SS=Number(servingSize.value)||0;
+  const FW=totalCookedWeight; const SS=Number(servingSize.value)||0;
   const totalEnergy=kcal(totalProtein,totalCarb,totalFat);
   const totalSalt_g=saltFromSodium_g(totalSodium_mg/1000);
 
@@ -283,7 +303,7 @@ function compute(){
   const ps=totalProtein*factorS, fs=totalFat*factorS, cs=totalCarb*factorS, fis=totalFiber*factorS;
   const nas_mg=totalSodium_mg*factorS, salts_g=totalSalt_g*factorS, kcals=kcal(ps,cs,fs);
 
-  totalsGrid.innerHTML=[
+  document.getElementById('totalsGrid').innerHTML=[
     chip('พลังงานรวม',r(totalEnergy,dp),'kcal'),
     chip('โปรตีนรวม',r(totalProtein,dp),'g'),
     chip('ไขมันรวม',r(totalFat,dp),'g'),
@@ -294,7 +314,7 @@ function compute(){
     chip('น้ำหนักสุทธิหลังปรุง',r(FW,dp),'g')
   ].join('');
 
-  convertGrid.innerHTML=[
+  document.getElementById('convertGrid').innerHTML=[
     `<div class="chip"><strong>ต่อ 100 g</strong><span></span></div>`,
     chip('พลังงาน',r(kcal100,dp),'kcal'),
     chip('โปรตีน',r(p100,dp),'g'),
@@ -314,56 +334,43 @@ function compute(){
   ].join('');
 
   const ash=2; const moisture=100-(p100+f100+c100+fi100+ash);
-  massCheck.textContent=`โปรตีน + ไขมัน + คาร์บ + ใยอาหาร + เถ้า(${ash} g) + ความชื้น(คำนวณ) = ${r(p100,1)} + ${r(f100,1)} + ${r(c100,1)} + ${r(fi100,1)} + ${ash} + ${r(moisture,1)} ≈ ${r(p100+f100+c100+fi100+ash+moisture,1)} g`;
+  document.getElementById('massCheck').textContent=
+    `โปรตีน + ไขมัน + คาร์บ + ใยอาหาร + เถ้า(${ash} g) + ความชื้น(คำนวณ) = ${r(p100,1)} + ${r(f100,1)} + ${r(c100,1)} + ${r(fi100,1)} + ${ash} + ${r(moisture,1)} ≈ ${r(p100+f100+c100+fi100+ash+moisture,1)} g`;
 }
-function chip(label,v,u){ return `<div class="chip"><span>${label}</span><strong>${v} ${u}</strong></div>`; }
+function chip(label,v,u){return `<div class="chip"><span>${label}</span><strong>${v} ${u}</strong></div>`;}
 
-/* Export CSV/XLSX */
-function toCSV(rows){ return rows.map(r=>r.map(v=>`"${String(v).replaceAll('"','""')}"`).join(',')).join('\n'); }
-function downloadCSV(name,csv){ const blob=new Blob([csv],{type:'text/csv;charset=utf-8;'}); const url=URL.createObjectURL(blob); const a=document.createElement('a'); a.href=url; a.download=name; document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url); }
-function exportXLSX(filename, sheets){ const wb=XLSX.utils.book_new(); for(const {name,rows} of sheets){ const ws=XLSX.utils.aoa_to_sheet(rows); XLSX.utils.book_append_sheet(wb,ws,name);} XLSX.writeFile(wb,filename); }
-
+/* Export helpers */
+function toCSV(rows){return rows.map(r=>r.map(v=>`"${String(v).replaceAll('"','""')}"`).join(',')).join('\n');}
+function downloadCSV(name,csv){const blob=new Blob([csv],{type:'text/csv;charset=utf-8;'});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download=name;document.body.appendChild(a);a.click();a.remove();URL.revokeObjectURL(url);}
+function exportXLSX(filename, sheets){const wb=XLSX.utils.book_new(); for(const {name,rows} of sheets){const ws=XLSX.utils.aoa_to_sheet(rows); XLSX.utils.book_append_sheet(wb,ws,name);} XLSX.writeFile(wb,filename);}
 function rowsForResults(){
   compute();
-  const textTotals=document.querySelectorAll('#totalsGrid .chip strong');
-  const text100=document.querySelectorAll('#convertGrid .chip strong');
-  const rows=[];
+  const t=document.querySelectorAll('#totalsGrid .chip strong'); const c=document.querySelectorAll('#convertGrid .chip strong'); const rows=[];
   rows.push(['meta','serving_size_g',document.getElementById('servingSize').value]);
   rows.push(['meta','servings_per_pack',document.getElementById('servingsPerPack').value]);
-
-  const totals=['kcal_total','protein_total_g','fat_total_g','carb_total_g','fiber_total_g','sodium_total_mg','salt_total_g','final_weight_g'];
-  totals.forEach((k,i)=>rows.push(['total',k,textTotals[i]?.textContent||'']));
-
-  const labels100=['kcal_100g','protein_100g_g','fat_100g_g','carb_100g_g','fiber_100g_g','sodium_100g_mg','salt_100g_g'];
-  labels100.forEach((k,i)=>rows.push(['per100g',k,text100[i+1]?.textContent||'']));
-
-  const labelsS=['kcal_per_serving','protein_per_serving_g','fat_per_serving_g','carb_per_serving_g','fiber_per_serving_g','sodium_per_serving_mg','salt_per_serving_g'];
-  labelsS.forEach((k,i)=>rows.push(['perserving',k,text100[8+1+i]?.textContent||'']));
+  ['kcal_total','protein_total_g','fat_total_g','carb_total_g','fiber_total_g','sodium_total_mg','salt_total_g','final_weight_g']
+    .forEach((k,i)=>rows.push(['total',k,t[i]?.textContent||'']));
+  ['kcal_100g','protein_100g_g','fat_100g_g','carb_100g_g','fiber_100g_g','sodium_100g_mg','salt_100g_g']
+    .forEach((k,i)=>rows.push(['per100g',k,c[i+1]?.textContent||'']));
+  ['kcal_per_serving','protein_per_serving_g','fat_per_serving_g','carb_per_serving_g','fiber_per_serving_g','sodium_per_serving_mg','salt_per_serving_g']
+    .forEach((k,i)=>rows.push(['perserving',k,c[8+1+i]?.textContent||'']));
   return rows;
 }
 function rowsForIngredients(){
   const head=['name','method','raw_g','yield','ret_protein','ret_fat','ret_carb','ret_fiber','ret_sodium'];
   const rows=[head];
-  [...ingBody.querySelectorAll('tr')].forEach(tr=>{
+  [...document.querySelectorAll('#ingBody tr')].forEach(tr=>{
     rows.push([
-      tr.querySelector('.ing-name').value,
-      tr.querySelector('.ing-method').value,
-      tr.querySelector('.ing-raw').value,
-      tr.querySelector('.ing-yield').value,
-      tr.querySelector('.ing-ret-p').value,
-      tr.querySelector('.ing-ret-f').value,
-      tr.querySelector('.ing-ret-c').value,
-      tr.querySelector('.ing-ret-fi').value,
-      tr.querySelector('.ing-ret-na').value
+      tr.querySelector('.ing-name').value, tr.querySelector('.ing-method').value, tr.querySelector('.ing-raw').value,
+      tr.querySelector('.ing-yield').value, tr.querySelector('.ing-ret-p').value, tr.querySelector('.ing-ret-f').value,
+      tr.querySelector('.ing-ret-c').value, tr.querySelector('.ing-ret-fi').value, tr.querySelector('.ing-ret-na').value
     ]);
-  });
-  return rows;
+  }); return rows;
 }
-
-document.getElementById('btnExportResults').addEventListener('click',()=>downloadCSV('nutrition_results.csv',toCSV(rowsForResults())));
-document.getElementById('btnExportIngs').addEventListener('click',()=>downloadCSV('ingredients_input.csv',toCSV(rowsForIngredients())));
-document.getElementById('btnExportResultsXLSX').addEventListener('click',()=>exportXLSX('nutrition_results.xlsx',[{name:'results',rows:rowsForResults()}]));
-document.getElementById('btnExportIngsXLSX').addEventListener('click',()=>exportXLSX('ingredients_input.xlsx',[{name:'ingredients',rows:rowsForIngredients()}]));
+document.getElementById('btnExportResults').addEventListener('click',()=>{downloadCSV('nutrition_results.csv',toCSV(rowsForResults())); showToast('Export CSV เสร็จแล้ว'); confetti({particleCount:80,spread:70,origin:{y:.8}});});
+document.getElementById('btnExportIngs').addEventListener('click',()=>{downloadCSV('ingredients_input.csv',toCSV(rowsForIngredients())); showToast('Export CSV เสร็จแล้ว'); confetti({particleCount:80,spread:70,origin:{y:.8}});});
+document.getElementById('btnExportResultsXLSX').addEventListener('click',()=>{exportXLSX('nutrition_results.xlsx',[{name:'results',rows:rowsForResults()}]); showToast('Export XLSX เสร็จแล้ว'); confetti({particleCount:80,spread:70,origin:{y:.8}});});
+document.getElementById('btnExportIngsXLSX').addEventListener('click',()=>{exportXLSX('ingredients_input.xlsx',[{name:'ingredients',rows:rowsForIngredients()}]); showToast('Export XLSX เสร็จแล้ว'); confetti({particleCount:80,spread:70,origin:{y:.8}});});
 </script>
 </body>
 </html>
