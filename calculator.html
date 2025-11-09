@@ -4,20 +4,14 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Nutrition Calculator | คำนวณโภชนาการจากสูตรอาหาร</title>
-  <meta name="description" content="คำนวณคุณค่าทางโภชนาการจากวัตถุดิบและน้ำหนักที่ระบุ รองรับ yield และ retention factors" />
+  <meta name="description" content="คำนวณคุณค่าทางโภชนาการจากวัตถุดิบและน้ำหนักที่ระบุ รองรับ yield/retention และพรีเซ็ตวิธีปรุง พร้อมส่งออก CSV" />
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
   <style>
     :root{ --radius:16px; --shadow:0 5px 18px rgba(15,23,42,.06); }
-    :root,[data-theme="light"]{
-      --bg:#f7fafc; --text:#0f172a; --muted:#5b677a; --card:#ffffff; --border:#e5e9f2;
-      --accent:#2563eb; --accent-weak:#e6efff; --chip:#f1f5f9; --chip-border:#e2e8f0; --link:#0b5ad9;
-    }
-    [data-theme="dark"]{
-      --bg:#0b1220; --text:#e7ecf5; --muted:#8ea0bd; --card:#121a2b; --border:#1f2a44;
-      --accent:#74c0fc; --accent-weak:#0c2d4f; --chip:#0f1729; --chip-border:#223154; --link:#a6c8ff;
-    }
+    :root,[data-theme="light"]{ --bg:#f7fafc; --text:#0f172a; --muted:#5b677a; --card:#ffffff; --border:#e5e9f2; --accent:#2563eb; --accent-weak:#e6efff; --chip:#f1f5f9; --chip-border:#e2e8f0; --link:#0b5ad9; }
+    [data-theme="dark"]{ --bg:#0b1220; --text:#e7ecf5; --muted:#8ea0bd; --card:#121a2b; --border:#1f2a44; --accent:#74c0fc; --accent-weak:#0c2d4f; --chip:#0f1729; --chip-border:#223154; --link:#a6c8ff; }
     *{box-sizing:border-box}
     html,body{height:100%}
     body{margin:0;font-family:Inter,system-ui,Segoe UI,Roboto,Helvetica,Arial,sans-serif;background:var(--bg);color:var(--text)}
@@ -46,15 +40,13 @@
     .grid.cols-2{grid-template-columns:1fr 1fr}
     .grid.cols-3{grid-template-columns:1fr 1fr 1fr}
     .row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
-    input, select, textarea{
-      width:100%;padding:12px;border-radius:12px;border:1px solid var(--border);background:var(--card);color:var(--text);
-    }
+    input, select, textarea{ width:100%;padding:12px;border-radius:12px;border:1px solid var(--border);background:var(--card);color:var(--text) }
     label{font-size:13px;color:var(--muted)}
     .btn{border:1px solid var(--border);background:var(--card);color:var(--text);padding:10px 12px;border-radius:12px;cursor:pointer;text-decoration:none}
     .btn.primary{background:var(--accent);color:#fff;border:0}
     .table{width:100%;border-collapse:separate;border-spacing:0;border:1px solid var(--border);border-radius:14px;overflow:hidden}
-    .table th,.table td{padding:10px;border-bottom:1px solid var(--border);text-align:left;background:var(--card)}
-    .table th{font-size:13px;color:var(--muted)}
+    .table th,.table td{padding:8px 10px;border-bottom:1px solid var(--border);text-align:left;background:var(--card);vertical-align:middle}
+    .table th{font-size:12px;color:var(--muted)}
     .muted{color:var(--muted)}
     .chip{background:var(--chip);border:1px solid var(--chip-border);border-radius:12px;padding:10px 12px;font-size:13px;display:flex;justify-content:space-between;gap:8px}
     .nutri-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:10px}
@@ -84,14 +76,16 @@
 
     <header class="hero">
       <h1>คำนวณโภชนาการจากสูตรอาหาร</h1>
-      <p class="sub">ใส่รายการวัตถุดิบและน้ำหนัก (กรัม) ระบบจะคำนวณสารอาหารรวม พร้อมปรับค่า per 100 g และ per serving<br>
-        รองรับ <em>yield factor</em> และ <em>retention factor</em> ต่อสารอาหาร</p>
+      <p class="sub">ใส่รายการวัตถุดิบและน้ำหนัก (กรัม) ระบบจะคำนวณสารอาหารรวม พร้อมปรับค่า per 100 g และ per serving<br>รองรับ <em>yield factor</em> และ <em>retention factor</em> ต่อสารอาหาร + พรีเซ็ตวิธีปรุง</p>
       <div class="row">
         <a class="btn" href="index.html">← กลับหน้า ค้นหาข้อมูลสำเร็จรูป (OpenFoodFacts)</a>
+        <a class="btn" href="data/ingredients.json" target="_blank" rel="noopener">ดูฐานข้อมูล (JSON)</a>
+        <button class="btn" id="btnExportResults">ส่งออกผลลัพธ์ (CSV)</button>
+        <button class="btn" id="btnExportIngs">ส่งออกตารางวัตถุดิบ (CSV)</button>
       </div>
     </header>
 
-    <!-- การตั้งค่า -->
+    <!-- การตั้งค่าโดยรวม -->
     <div class="card section" style="margin-bottom:14px">
       <div class="grid cols-3">
         <div>
@@ -117,8 +111,8 @@
           </select>
         </div>
         <div>
-          <label>ฐานข้อมูลวัตถุดิบ (เลือก/พิมพ์ค้น)</label>
-          <input id="searchIngredient" type="text" placeholder="พิมพ์เพื่อค้น เช่น ข้าวหุงสุก, chicken, น้ำปลา">
+          <label>ค้นหาวัตถุดิบจากฐานข้อมูล</label>
+          <input id="searchIngredient" type="text" placeholder="พิมพ์เพื่อค้น เช่น ข้าวสวยหุงสุก, chicken, น้ำปลา" list="ing-list">
         </div>
         <div class="row">
           <button class="btn" id="btnAdd">+ เพิ่มแถว</button>
@@ -126,22 +120,27 @@
           <button class="btn" id="btnSample">ใส่ตัวอย่าง</button>
         </div>
       </div>
-      <p class="muted" style="margin-top:8px">หมายเหตุ: ฐานข้อมูลตัวอย่างเป็น “ค่าต่อ 100 g (ดิบ)” คุณสามารถแก้/ขยายได้ในสคริปต์ หรือแยกเป็นไฟล์ JSON ก็ได้</p>
+      <p class="muted" style="margin-top:8px">หมายเหตุ: พรีเซ็ตวิธีปรุงเป็นค่าประมาณเพื่อการสอน/สาธิต ปรับแต่งตามบริบทจริงได้</p>
     </div>
 
+    <!-- datalist กลาง ให้ input ทุกแถวใช้งานร่วมกัน -->
+    <datalist id="ing-list"></datalist>
+
     <!-- ตารางวัตถุดิบ -->
-    <div class="card section" style="margin-bottom:14px">
+    <div class="card section" style="margin-bottom:14px; overflow:auto">
       <table class="table" id="ingTable">
         <thead>
           <tr>
-            <th style="width:22%">ชื่อวัตถุดิบ</th>
-            <th style="width:12%">น้ำหนักดิบ (g)</th>
-            <th style="width:12%">Yield factor</th>
-            <th style="width:12%">Retention โปรตีน</th>
-            <th style="width:12%">Retention ไขมัน</th>
-            <th style="width:12%">Retention คาร์บ</th>
-            <th style="width:12%">Retention ใยอาหาร</th>
-            <th style="width:6%"></th>
+            <th style="min-width:200px">ชื่อวัตถุดิบ</th>
+            <th style="min-width:130px">วิธีปรุง (พรีเซ็ต)</th>
+            <th style="min-width:110px">น้ำหนักดิบ (g)</th>
+            <th style="min-width:110px">Yield</th>
+            <th style="min-width:140px">Ret. โปรตีน</th>
+            <th style="min-width:120px">Ret. ไขมัน</th>
+            <th style="min-width:140px">Ret. คาร์บ</th>
+            <th style="min-width:150px">Ret. ใยอาหาร</th>
+            <th style="min-width:140px">Ret. โซเดียม</th>
+            <th style="min-width:60px"></th>
           </tr>
         </thead>
         <tbody id="ingBody"></tbody>
@@ -178,7 +177,7 @@
   </footer>
 
 <script>
-/* ====== ตั้งค่าเครดิต/โลโก้ให้เหมือนหน้าแรก ====== */
+/* ====== เครดิต/โลโก้/ธีม ====== */
 const CREDIT_TEXT = "ผู้จัดทำ: ครูศักดิ์สิทธิ์ บำรุง | แผนกวิชาอาหารและโภชนาการ วิทยาลัยอาชีวศึกษาสุโขทัย | © 2025";
 const LOGOS = ["assets/img/logo1.png","assets/img/logo2.png","assets/img/logo3.png"];
 
@@ -187,272 +186,253 @@ function applyTheme(t){ root.setAttribute('data-theme', t); localStorage.setItem
 function toggleTheme(){ const cur = root.getAttribute('data-theme')||'light'; applyTheme(cur==='light'?'dark':'light'); }
 (function initTheme(){ applyTheme(localStorage.getItem('nf-theme')||'light'); })();
 document.getElementById('themeToggle').addEventListener('click', toggleTheme);
+function safeSetLogo(id, src){ const el = document.getElementById(id); if(!el) return; el.onerror = ()=>{ el.style.display='none'; }; if(src) el.src = src; }
 
-function safeSetLogo(id, src){
-  const el = document.getElementById(id);
-  if(!el) return;
-  el.onerror = () => { el.style.display = 'none'; };
-  if(src) el.src = src;
-}
-window.addEventListener('DOMContentLoaded', ()=>{
-  const top = document.getElementById('creditTop');
-  const bottom = document.getElementById('creditBottom');
-  if(top) top.textContent = CREDIT_TEXT;
-  if(bottom) bottom.textContent = CREDIT_TEXT;
-  const [l1,l2,l3] = LOGOS;
-  safeSetLogo('logo1', l1); safeSetLogo('logo2', l2); safeSetLogo('logo3', l3);
-});
+/* ====== พรีเซ็ตวิธีปรุง (ค่าประมาณเพื่อสาธิต) ====== */
+const PRESETS = {
+  'ไม่มี/ดิบ':       { yld:1.00, rp:1.00, rf:1.00, rc:1.00, rfi:1.00, rna:1.00 },
+  'ต้ม/ลวก/ตุ๋น':    { yld:0.95, rp:0.95, rf:0.98, rc:0.95, rfi:0.90, rna:1.00 },
+  'นึ่ง':            { yld:0.98, rp:0.97, rf:0.99, rc:0.97, rfi:0.92, rna:1.00 },
+  'ผัด':             { yld:0.90, rp:0.95, rf:1.05, rc:0.95, rfi:0.90, rna:1.00 },
+  'ทอด':             { yld:0.80, rp:0.93, rf:1.10, rc:0.90, rfi:0.85, rna:1.00 },
+  'ย่าง/อบ':         { yld:0.80, rp:0.95, rf:1.00, rc:0.95, rfi:0.90, rna:1.00 }
+};
 
-  <!-- แทนที่ const DB = [...] เดิม ด้วยบล็อกนี้ -->
-<script>
-// ----- โหลดฐานข้อมูลจากไฟล์ภายนอก -----
-let DB = []; // จะถูกเติมหลังโหลดไฟล์
-
+/* ====== โหลดฐานข้อมูลจากไฟล์ (JSON/CSV) ====== */
+let DB = []; // ต่อ 100 g
 async function loadDB(){
-  try{
-    // 1) พยายามโหลด JSON ก่อน
-    const r = await fetch('data/ingredients.json', {cache:'no-store'});
-    if(r.ok){
-      DB = await r.json();
-      return;
-    }
-  }catch(e){ console.warn('โหลด JSON ไม่สำเร็จ:', e); }
-
-  try{
-    // 2) ถ้าไม่มี JSON ลอง CSV (ต้องมีหัวคอลัมน์: name,state,protein,fat,carbs,fiber,sodium_mg)
-    const r2 = await fetch('data/ingredients.csv', {cache:'no-store'});
-    if(r2.ok){
-      const text = await r2.text();
-      DB = parseCSV(text);
-      return;
-    }
-  }catch(e){ console.warn('โหลด CSV ไม่สำเร็จ:', e); }
-
-  // 3) fallback (เผื่อไม่มีไฟล์ใด ๆ)
-  DB = [
-    { name: "ข้าวสวยหุงสุก", state:"cooked", protein:2.6, fat:0.3, carbs:28.0, fiber:0.4, sodium_mg:2 },
-    { name: "อกไก่ดิบ", state:"raw", protein:21.0, fat:2.5, carbs:0.0, fiber:0.0, sodium_mg:70 }
-  ];
+  try{ const r = await fetch('data/ingredients.json', {cache:'no-store'}); if(r.ok){ DB = await r.json(); return; } }catch(e){ console.warn('โหลด JSON ไม่สำเร็จ:', e); }
+  try{ const r2 = await fetch('data/ingredients.csv', {cache:'no-store'}); if(r2.ok){ const text = await r2.text(); DB = parseCSV(text); return; } }catch(e){ console.warn('โหลด CSV ไม่สำเร็จ:', e); }
+  DB = [ { name: 'ข้าวสวยหุงสุก', state:'cooked', protein:2.6, fat:0.3, carbs:28.0, fiber:0.4, sodium_mg:2 }, { name: 'อกไก่ดิบ', state:'raw', protein:21.0, fat:2.5, carbs:0.0, fiber:0.0, sodium_mg:70 } ];
   console.warn('ใช้ฐานข้อมูล fallback ในตัวสคริปต์');
 }
+function parseCSV(csvText){ const lines = csvText.trim().split(/\r?\n/); const head = lines.shift().split(','); const idx = k=> head.indexOf(k); const out=[]; for(const line of lines){ if(!line.trim()) continue; const cols=line.split(','); out.push({ name:(cols[idx('name')]||'').trim(), state:(cols[idx('state')]||'').trim(), protein:Number(cols[idx('protein')]||0), fat:Number(cols[idx('fat')]||0), carbs:Number(cols[idx('carbs')]||0), fiber:Number(cols[idx('fiber')]||0), sodium_mg:Number(cols[idx('sodium_mg')]||0) }); } return out; }
 
-// ตัวช่วยอ่าน CSV แบบง่าย
-function parseCSV(csvText){
-  const lines = csvText.trim().split(/\r?\n/);
-  const head = lines.shift().split(',');
-  const idx = (k)=> head.indexOf(k);
-  const out = [];
-  for(const line of lines){
-    if(!line.trim()) continue;
-    const cols = line.split(',');
-    const row = {
-      name: cols[idx('name')]?.trim() || '',
-      state: cols[idx('state')]?.trim() || '',
-      protein: Number(cols[idx('protein')]||0),
-      fat: Number(cols[idx('fat')]||0),
-      carbs: Number(cols[idx('carbs')]||0),
-      fiber: Number(cols[idx('fiber')]||0),
-      sodium_mg: Number(cols[idx('sodium_mg')]||0),
-    };
-    out.push(row);
-  }
-  return out;
-}
+/* ====== DOM Ready ====== */
+const $ = s=>document.querySelector(s);
+const ingBody = $('#ingBody');
+const searchBox = $('#searchIngredient');
+const roundDp = $('#roundDp');
+const finalWeight = $('#finalWeight');
+const servingSize = $('#servingSize');
+const servingsPerPack = $('#servingsPerPack');
+const totalsGrid = $('#totalsGrid');
+const convertGrid = $('#convertGrid');
+const massCheck = $('#massCheck');
 
-// เรียกโหลดฐานข้อมูลให้เสร็จก่อน แล้วค่อย setup อย่างอื่น
 window.addEventListener('DOMContentLoaded', async ()=>{
-  // (ตรงนี้คุณมีโค้ดตั้งค่าเครดิต/โลโก้/ธีมอยู่แล้ว ไม่ต้องแก้)
+  const top = document.getElementById('creditTop'); const bottom = document.getElementById('creditBottom');
+  if(top) top.textContent = CREDIT_TEXT; if(bottom) bottom.textContent = CREDIT_TEXT;
+  const [l1,l2,l3] = LOGOS; safeSetLogo('logo1', l1); safeSetLogo('logo2', l2); safeSetLogo('logo3', l3);
+
   await loadDB();
+  document.getElementById('ing-list').innerHTML = DB.map(d=>`<option value="${d.name}">`).join('');
 
-  // ถ้ามี <datalist id="ing-list"> ให้รีเฟรชรายการจาก DB
-  const dl = document.getElementById('ing-list');
-  if(dl){
-    dl.innerHTML = DB.map(d=>`<option value="${d.name}">`).join('');
-  }
-
-  // ค่อยคำนวณ/รีเฟรชหน้าจอหลัง DB มาแล้ว
+  addRow();
   compute();
 });
-</script>
-
 
 /* ====== Utilities ====== */
-const $ = (s)=>document.querySelector(s);
 function r(v, dp){ const n = Number(v); if(!isFinite(n)) return 0; const f = Math.pow(10,dp); return Math.round(n*f)/f; }
-function kcal(p, c, f, sugarAlcohol=0, fiber=0){
-  // Atwater: 4/4/9 (อาจนับน้ำตาลแอลกอฮอล์ ~2.4 kcal/g, ใยอาหาร 0–2 kcal/g แล้วแต่นโยบาย; ที่นี่ไม่นับพลังงานจาก fiber)
-  return (4*p) + (4*c) + (9*f) + (2.4*sugarAlcohol);
-}
+function kcal(p, c, f, sugarAlcohol=0){ return (4*p) + (4*c) + (9*f) + (2.4*sugarAlcohol); }
 function saltFromSodium_g(sodium_g){ return sodium_g * 2.5; }
 
-/* ====== สถานะตาราง ====== */
-const ingBody = $("#ingBody");
-const searchBox = $("#searchIngredient");
-const roundDp = $("#roundDp");
-const finalWeight = $("#finalWeight");
-const servingSize = $("#servingSize");
-const servingsPerPack = $("#servingsPerPack");
-const totalsGrid = $("#totalsGrid");
-const convertGrid = $("#convertGrid");
-const massCheck = $("#massCheck");
-
+/* ====== เพิ่ม/ลบแถว + พรีเซ็ตวิธีปรุง ====== */
 function addRow(prefill){
-  const tr = document.createElement("tr");
+  const tr = document.createElement('tr');
   tr.innerHTML = `
+    <td><input class="ing-name" list="ing-list" placeholder="ชื่อวัตถุดิบ" value="${prefill?.name||''}"></td>
     <td>
-      <input class="ing-name" list="ing-list" placeholder="ชื่อวัตถุดิบ" value="${prefill?.name||""}">
-      <datalist id="ing-list">
-        ${DB.map(d=>`<option value="${d.name}">`).join("")}
-      </datalist>
+      <select class="ing-method">
+        ${Object.keys(PRESETS).map(k=>`<option ${prefill?.method===k?'selected':''}>${k}</option>`).join('')}
+      </select>
     </td>
-    <td><input class="ing-raw" type="number" step="0.1" placeholder="g" value="${prefill?.raw||""}"></td>
+    <td><input class="ing-raw" type="number" step="0.1" placeholder="g" value="${prefill?.raw||''}"></td>
     <td><input class="ing-yield" type="number" step="0.01" placeholder="เช่น 0.85" value="${prefill?.yld??1}"></td>
     <td><input class="ing-ret-p" type="number" step="0.01" placeholder="เช่น 0.95" value="${prefill?.rp??1}"></td>
     <td><input class="ing-ret-f" type="number" step="0.01" placeholder="เช่น 1.00" value="${prefill?.rf??1}"></td>
     <td><input class="ing-ret-c" type="number" step="0.01" placeholder="เช่น 0.90" value="${prefill?.rc??1}"></td>
     <td><input class="ing-ret-fi" type="number" step="0.01" placeholder="เช่น 0.90" value="${prefill?.rfi??1}"></td>
+    <td><input class="ing-ret-na" type="number" step="0.01" placeholder="เช่น 1.00" value="${prefill?.rna??1}"></td>
     <td><button class="btn btn-del">ลบ</button></td>
   `;
   ingBody.appendChild(tr);
-  tr.querySelector(".btn-del").addEventListener("click", ()=>{ tr.remove(); compute(); });
-  ["ing-name","ing-raw","ing-yield","ing-ret-p","ing-ret-f","ing-ret-c","ing-ret-fi"].forEach(cls=>{
-    tr.querySelector("."+cls).addEventListener("input", compute);
+
+  // bind events
+  tr.querySelector('.btn-del').addEventListener('click', ()=>{ tr.remove(); compute(); });
+  ['ing-name','ing-raw','ing-yield','ing-ret-p','ing-ret-f','ing-ret-c','ing-ret-fi','ing-ret-na'].forEach(cls=>{
+    tr.querySelector('.'+cls).addEventListener('input', compute);
+  });
+  tr.querySelector('.ing-method').addEventListener('change', ()=>{
+    const preset = PRESETS[tr.querySelector('.ing-method').value];
+    if(!preset) return;
+    tr.querySelector('.ing-yield').value  = preset.yld;
+    tr.querySelector('.ing-ret-p').value  = preset.rp;
+    tr.querySelector('.ing-ret-f').value  = preset.rf;
+    tr.querySelector('.ing-ret-c').value  = preset.rc;
+    tr.querySelector('.ing-ret-fi').value = preset.rfi;
+    tr.querySelector('.ing-ret-na').value = preset.rna;
+    compute();
   });
 }
 
-$("#btnAdd").addEventListener("click", ()=> addRow());
-$("#btnClear").addEventListener("click", ()=>{ ingBody.innerHTML=""; compute(); });
-$("#btnSample").addEventListener("click", ()=>{
-  ingBody.innerHTML="";
-  addRow({name:"ข้าวสวยหุงสุก", raw:300, yld:1.00, rp:1.00, rf:1.00, rc:1.00, rfi:1.00});
-  addRow({name:"อกไก่ดิบ", raw:200, yld:0.75, rp:0.95, rf:1.00, rc:0.90, rfi:0.90}); // ตัวอย่าง: สุกหดตัว, โปรตีนคงเหลือ 95%
-  addRow({name:"น้ำปลา", raw:15, yld:1.00, rp:1.00, rf:1.00, rc:1.00, rfi:1.00});
-  finalWeight.value = 600; servingSize.value = 150; servingsPerPack.value = 4;
+$('#btnAdd').addEventListener('click', ()=> addRow());
+$('#btnClear').addEventListener('click', ()=>{ ingBody.innerHTML=''; compute(); });
+$('#btnSample').addEventListener('click', ()=>{
+  ingBody.innerHTML='';
+  addRow({name:'ข้าวสวยหุงสุก', method:'ไม่มี/ดิบ', raw:300, yld:1.00, rp:1.00, rf:1.00, rc:1.00, rfi:1.00, rna:1.00});
+  addRow({name:'อกไก่ดิบ', method:'ย่าง/อบ', raw:200, yld:0.80, rp:0.95, rf:1.00, rc:0.95, rfi:0.90, rna:1.00});
+  addRow({name:'น้ำปลา', method:'ไม่มี/ดิบ', raw:15, yld:1.00, rp:1.00, rf:1.00, rc:1.00, rfi:1.00, rna:1.00});
+  finalWeight.value = 600; servingSize.value = 150; servingsPerPack.value = 4; roundDp.value = 1;
   compute();
 });
 
-[roundDp, finalWeight, servingSize, servingsPerPack].forEach(el=> el.addEventListener("input", compute));
-
-/* ค้นหาอัตโนมัติ */
-searchBox.addEventListener("change", ()=>{
-  const val = searchBox.value.trim();
-  if(!val) return;
-  const hit = DB.find(d => d.name === val);
-  if(hit){ addRow({name:hit.name, raw:100}); }
-  else { addRow({name:val, raw:100}); }
-  searchBox.value="";
-  compute();
+searchBox.addEventListener('change', ()=>{
+  const val = searchBox.value.trim(); if(!val) return;
+  const hit = DB.find(d=>d.name === val);
+  if(hit){ addRow({name:hit.name, method:'ไม่มี/ดิบ', raw:100}); } else { addRow({name:val, method:'ไม่มี/ดิบ', raw:100}); }
+  searchBox.value=''; compute();
 });
+[roundDp, finalWeight, servingSize, servingsPerPack].forEach(el=> el.addEventListener('input', compute));
 
-/* ====== แกนคำนวณ ======
-   1) ดึงค่าต่อ 100 g ของวัตถุดิบ (โปรตีน/ไขมัน/คาร์บ/ใย/โซเดียม)
-   2) แปลงตามน้ำหนักดิบที่ใช้จริง
-   3) ปรับตาม yield (น้ำหนักหลังปรุง) และ retention ต่อสารอาหาร
-   4) รวมทุกวัตถุดิบ => ได้ "ทั้งจาน"
-   5) แปลงเป็นต่อ 100 g (ด้วย finalWeight) และต่อ serving (ด้วย servingSize)
-*/
+/* ====== แกนคำนวณ ====== */
 function compute(){
   const dp = Number(roundDp.value||1);
-
   let totalProtein=0, totalFat=0, totalCarb=0, totalFiber=0, totalSodium_mg=0;
   let totalCookedWeight = 0;
 
-  [...ingBody.querySelectorAll("tr")].forEach(tr=>{
-    const name = tr.querySelector(".ing-name").value.trim();
-    const raw = Number(tr.querySelector(".ing-raw").value||0);
-    const yld = Number(tr.querySelector(".ing-yield").value||1);
-    const rp  = Number(tr.querySelector(".ing-ret-p").value||1);
-    const rf  = Number(tr.querySelector(".ing-ret-f").value||1);
-    const rc  = Number(tr.querySelector(".ing-ret-c").value||1);
-    const rfi = Number(tr.querySelector(".ing-ret-fi").value||1);
-
+  [...ingBody.querySelectorAll('tr')].forEach(tr=>{
+    const name = tr.querySelector('.ing-name').value.trim();
+    const raw = Number(tr.querySelector('.ing-raw').value||0);
+    const yld = Number(tr.querySelector('.ing-yield').value||1);
+    const rp  = Number(tr.querySelector('.ing-ret-p').value||1);
+    const rf  = Number(tr.querySelector('.ing-ret-f').value||1);
+    const rc  = Number(tr.querySelector('.ing-ret-c').value||1);
+    const rfi = Number(tr.querySelector('.ing-ret-fi').value||1);
+    const rna = Number(tr.querySelector('.ing-ret-na').value||1);
     if(!raw || raw<=0) return;
 
     const base = DB.find(d=>d.name===name);
     const P100 = base?.protein??0, F100 = base?.fat??0, C100 = base?.carbs??0, FI100 = base?.fiber??0, NA100_mg = base?.sodium_mg??0;
 
-    // ปริมาณสารอาหารจากน้ำหนักดิบที่ใช้จริง (หน่วย g; โซเดียมเป็น mg)
-    const p = (P100/100) * raw;    // g
-    const f = (F100/100) * raw;    // g
-    const c = (C100/100) * raw;    // g
-    const fi= (FI100/100) * raw;   // g
-    const na_mg = (NA100_mg/100) * raw; // mg
+    const p = (P100/100) * raw;
+    const f = (F100/100) * raw;
+    const c = (C100/100) * raw;
+    const fi= (FI100/100) * raw;
+    const na_mg = (NA100_mg/100) * raw;
 
-    // ปรับผลจากการปรุง: yield (ส่งผลต่อน้ำหนักสุทธิ) + retention ต่อสารอาหาร
-    const cookedWeight = raw * yld;
-    totalCookedWeight += cookedWeight;
+    const cookedWeight = raw * yld; totalCookedWeight += cookedWeight;
 
-    totalProtein    += p * rp;
-    totalFat        += f * rf;
-    totalCarb       += c * rc;
-    totalFiber      += fi * rfi;
-    totalSodium_mg  += na_mg; // โซเดียมมักไม่หายไปมากในการปรุงทั่วไป (คงค่าไว้ หรือจะตั้ง retention เพิ่มก็ได้)
+    totalProtein   += p * rp;
+    totalFat       += f * rf;
+    totalCarb      += c * rc;
+    totalFiber     += fi * rfi;
+    totalSodium_mg += na_mg * rna;
   });
 
-  // ถ้าไม่ได้กำหนด finalWeight ให้ใช้ totalCookedWeight เป็นค่าอ้างอิง
   const FW = Number(finalWeight.value) > 0 ? Number(finalWeight.value) : totalCookedWeight;
   const SS = Number(servingSize.value) || 0;
 
-  // ทั้งจาน (หลังปรับ)
   const totalEnergy = kcal(totalProtein, totalCarb, totalFat);
   const totalSalt_g = saltFromSodium_g(totalSodium_mg/1000);
 
-  // per 100 g
   const factor100 = FW>0 ? (100/FW) : 0;
   const p100 = totalProtein*factor100, f100 = totalFat*factor100, c100 = totalCarb*factor100, fi100 = totalFiber*factor100;
-  const na100_mg = totalSodium_mg*factor100;
-  const salt100_g = totalSalt_g*factor100;
-  const kcal100 = kcal(p100, c100, f100);
+  const na100_mg = totalSodium_mg*factor100; const salt100_g = totalSalt_g*factor100; const kcal100 = kcal(p100, c100, f100);
 
-  // per serving
   const factorS = (SS>0 && FW>0) ? (SS/FW) : 0;
   const ps = totalProtein*factorS, fs=totalFat*factorS, cs=totalCarb*factorS, fis=totalFiber*factorS;
-  const nas_mg = totalSodium_mg*factorS;
-  const salts_g = totalSalt_g*factorS;
-  const kcals = kcal(ps, cs, fs);
+  const nas_mg = totalSodium_mg*factorS; const salts_g = totalSalt_g*factorS; const kcals = kcal(ps, cs, fs);
 
-  // Render รวมทั้งจาน
   totalsGrid.innerHTML = [
-    chip("พลังงานรวม", r(totalEnergy, dp), "kcal"),
-    chip("โปรตีนรวม", r(totalProtein, dp), "g"),
-    chip("ไขมันรวม", r(totalFat, dp), "g"),
-    chip("คาร์บรวม", r(totalCarb, dp), "g"),
-    chip("ใยอาหารรวม", r(totalFiber, dp), "g"),
-    chip("โซเดียมรวม", r(totalSodium_mg, dp), "mg"),
-    chip("เกลือรวม", r(totalSalt_g, dp), "g"),
-    chip("น้ำหนักสุทธิหลังปรุง", r(FW, dp), "g")
-  ].join("");
+    chip('พลังงานรวม', r(totalEnergy, dp), 'kcal'),
+    chip('โปรตีนรวม', r(totalProtein, dp), 'g'),
+    chip('ไขมันรวม', r(totalFat, dp), 'g'),
+    chip('คาร์บรวม', r(totalCarb, dp), 'g'),
+    chip('ใยอาหารรวม', r(totalFiber, dp), 'g'),
+    chip('โซเดียมรวม', r(totalSodium_mg, dp), 'mg'),
+    chip('เกลือรวม', r(totalSalt_g, dp), 'g'),
+    chip('น้ำหนักสุทธิหลังปรุง', r(FW, dp), 'g')
+  ].join('');
 
-  // Render per 100 g และ per serving
   convertGrid.innerHTML = [
     `<div class="chip"><strong>ต่อ 100 g</strong><span></span></div>`,
-    chip("พลังงาน", r(kcal100, dp), "kcal"),
-    chip("โปรตีน", r(p100, dp), "g"),
-    chip("ไขมัน", r(f100, dp), "g"),
-    chip("คาร์บ", r(c100, dp), "g"),
-    chip("ใยอาหาร", r(fi100, dp), "g"),
-    chip("โซเดียม", r(na100_mg, dp), "mg"),
-    chip("เกลือ", r(salt100_g, dp), "g"),
+    chip('พลังงาน', r(kcal100, dp), 'kcal'),
+    chip('โปรตีน', r(p100, dp), 'g'),
+    chip('ไขมัน', r(f100, dp), 'g'),
+    chip('คาร์บ', r(c100, dp), 'g'),
+    chip('ใยอาหาร', r(fi100, dp), 'g'),
+    chip('โซเดียม', r(na100_mg, dp), 'mg'),
+    chip('เกลือ', r(salt100_g, dp), 'g'),
     `<div class="chip"><strong>ต่อ serving (${r(SS,dp)} g)</strong><span></span></div>`,
-    chip("พลังงาน", r(kcals, dp), "kcal"),
-    chip("โปรตีน", r(ps, dp), "g"),
-    chip("ไขมัน", r(fs, dp), "g"),
-    chip("คาร์บ", r(cs, dp), "g"),
-    chip("ใยอาหาร", r(fis, dp), "g"),
-    chip("โซเดียม", r(nas_mg, dp), "mg"),
-    chip("เกลือ", r(salts_g, dp), "g")
-  ].join("");
+    chip('พลังงาน', r(kcals, dp), 'kcal'),
+    chip('โปรตีน', r(ps, dp), 'g'),
+    chip('ไขมัน', r(fs, dp), 'g'),
+    chip('คาร์บ', r(cs, dp), 'g'),
+    chip('ใยอาหาร', r(fis, dp), 'g'),
+    chip('โซเดียม', r(nas_mg, dp), 'mg'),
+    chip('เกลือ', r(salts_g, dp), 'g')
+  ].join('');
 
-  // ตรวจมวลรวมต่อ 100 g (โดยประมาณ)
-  const ash = 2; // สมมุติให้มีเถ้า ~2 g/100g (แก้เองได้ตามอาหาร)
+  const ash = 2; // สมมุติเพื่อการสอน
   const moisture = 100 - (p100 + f100 + c100 + fi100 + ash);
-  massCheck.textContent = `โปรตีน + ไขมัน + คาร์บ + ใยอาหาร + เถ้า(สมมุติ ${ash} g) + ความชื้น(คำนวณ) = `
-    + `${r(p100,1)} + ${r(f100,1)} + ${r(c100,1)} + ${r(fi100,1)} + ${ash} + ${r(moisture,1)} ≈ ${r(p100+f100+c100+fi100+ash+moisture,1)} g`;
+  massCheck.textContent = `โปรตีน + ไขมัน + คาร์บ + ใยอาหาร + เถ้า(${ash} g) + ความชื้น(คำนวณ) = ${r(p100,1)} + ${r(f100,1)} + ${r(c100,1)} + ${r(fi100,1)} + ${ash} + ${r(moisture,1)} ≈ ${r(p100+f100+c100+fi100+ash+moisture,1)} g`;
 }
 
 function chip(label, v, unit){ return `<div class="chip"><span>${label}</span><strong>${v} ${unit}</strong></div>`; }
 
-compute(); // เริ่มต้น
+/* ====== ส่งออก CSV ====== */
+function toCSV(rows){ return rows.map(r=> r.map(v=>`"${String(v).replaceAll('"','""')}"`).join(',')).join('\n'); }
+function downloadCSV(filename, csv){ const blob = new Blob([csv], {type:'text/csv;charset=utf-8;'}); const url = URL.createObjectURL(blob); const a = document.createElement('a'); a.href = url; a.download = filename; document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url); }
+
+function exportIngredientsCSV(){
+  const head = ['name','method','raw_g','yield','ret_protein','ret_fat','ret_carb','ret_fiber','ret_sodium'];
+  const rows = [head];
+  [...ingBody.querySelectorAll('tr')].forEach(tr=>{
+    rows.push([
+      tr.querySelector('.ing-name').value,
+      tr.querySelector('.ing-method').value,
+      tr.querySelector('.ing-raw').value,
+      tr.querySelector('.ing-yield').value,
+      tr.querySelector('.ing-ret-p').value,
+      tr.querySelector('.ing-ret-f').value,
+      tr.querySelector('.ing-ret-c').value,
+      tr.querySelector('.ing-ret-fi').value,
+      tr.querySelector('.ing-ret-na').value,
+    ]);
+  });
+  downloadCSV('ingredients_input.csv', toCSV(rows));
+}
+
+function exportResultsCSV(){
+  // สร้างอีกครั้งให้ได้ค่าล่าสุด
+  compute();
+  const dp = Number(roundDp.value||1);
+  const textTotals = document.querySelectorAll('#totalsGrid .chip strong');
+  const text100   = document.querySelectorAll('#convertGrid .chip strong');
+
+  const rows = [];
+  rows.push(['meta','final_weight_g', document.getElementById('finalWeight').value]);
+  rows.push(['meta','serving_size_g', document.getElementById('servingSize').value]);
+  rows.push(['meta','servings_per_pack', document.getElementById('servingsPerPack').value]);
+
+  // ดึงค่าแบบง่าย (ตามลำดับที่เราวางไว้)
+  const totalsLabels = ['kcal_total','protein_total_g','fat_total_g','carb_total_g','fiber_total_g','sodium_total_mg','salt_total_g','final_weight_g'];
+  totalsLabels.forEach((k,i)=> rows.push(['total', k, textTotals[i]?.textContent || '']));
+
+  const labels100 = ['kcal_100g','protein_100g_g','fat_100g_g','carb_100g_g','fiber_100g_g','sodium_100g_mg','salt_100g_g'];
+  labels100.forEach((k,i)=> rows.push(['per100g', k, text100[i+1]?.textContent || '']));
+
+  const ss = document.getElementById('servingSize').value || 0;
+  const labelsS = ['kcal_per_serving','protein_per_serving_g','fat_per_serving_g','carb_per_serving_g','fiber_per_serving_g','sodium_per_serving_mg','salt_per_serving_g'];
+  // offset: 8 chips ก่อนหน้า + 1 ชิปหัวข้อ per serving
+  labelsS.forEach((k,i)=> rows.push(['perserving', k, text100[8 + 1 + i]?.textContent || '']));
+
+  downloadCSV('nutrition_results.csv', toCSV(rows));
+}
+
+document.getElementById('btnExportResults').addEventListener('click', exportResultsCSV);
+document.getElementById('btnExportIngs').addEventListener('click', exportIngredientsCSV);
 </script>
 </body>
 </html>
