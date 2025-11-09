@@ -203,16 +203,78 @@ window.addEventListener('DOMContentLoaded', ()=>{
   safeSetLogo('logo1', l1); safeSetLogo('logo2', l2); safeSetLogo('logo3', l3);
 });
 
-/* ====== ฐานข้อมูลตัวอย่าง (ต่อ 100 g, วัตถุดิบดิบ) ======
-   หมายเหตุ: แก้/เพิ่มได้ตามต้องการ หรือภายหลังแยกไฟล์ ingredients.json แล้ว fetch ก็ได้ */
-const DB = [
-  { name: "ข้าวสารหอมมะลิ (ดิบ)", protein:7.1, fat:0.6, carbs:78.2, fiber:1.0, sodium_mg:5 },
-  { name: "ข้าวสวยหุงสุก", protein:2.6, fat:0.3, carbs:28.0, fiber:0.4, sodium_mg:2 },
-  { name: "อกไก่ดิบ", protein:21.0, fat:2.5, carbs:0.0, fiber:0.0, sodium_mg:70 },
-  { name: "น้ำปลา", protein:0.0, fat:0.0, carbs:0.0, fiber:0.0, sodium_mg:7000 }, // 7,000 mg/100 g ตัวอย่าง
-  { name: "น้ำตาลทราย", protein:0.0, fat:0.0, carbs:100.0, fiber:0.0, sodium_mg:0 },
-  { name: "น้ำมันพืช", protein:0.0, fat:100.0, carbs:0.0, fiber:0.0, sodium_mg:0 },
-];
+  <!-- แทนที่ const DB = [...] เดิม ด้วยบล็อกนี้ -->
+<script>
+// ----- โหลดฐานข้อมูลจากไฟล์ภายนอก -----
+let DB = []; // จะถูกเติมหลังโหลดไฟล์
+
+async function loadDB(){
+  try{
+    // 1) พยายามโหลด JSON ก่อน
+    const r = await fetch('data/ingredients.json', {cache:'no-store'});
+    if(r.ok){
+      DB = await r.json();
+      return;
+    }
+  }catch(e){ console.warn('โหลด JSON ไม่สำเร็จ:', e); }
+
+  try{
+    // 2) ถ้าไม่มี JSON ลอง CSV (ต้องมีหัวคอลัมน์: name,state,protein,fat,carbs,fiber,sodium_mg)
+    const r2 = await fetch('data/ingredients.csv', {cache:'no-store'});
+    if(r2.ok){
+      const text = await r2.text();
+      DB = parseCSV(text);
+      return;
+    }
+  }catch(e){ console.warn('โหลด CSV ไม่สำเร็จ:', e); }
+
+  // 3) fallback (เผื่อไม่มีไฟล์ใด ๆ)
+  DB = [
+    { name: "ข้าวสวยหุงสุก", state:"cooked", protein:2.6, fat:0.3, carbs:28.0, fiber:0.4, sodium_mg:2 },
+    { name: "อกไก่ดิบ", state:"raw", protein:21.0, fat:2.5, carbs:0.0, fiber:0.0, sodium_mg:70 }
+  ];
+  console.warn('ใช้ฐานข้อมูล fallback ในตัวสคริปต์');
+}
+
+// ตัวช่วยอ่าน CSV แบบง่าย
+function parseCSV(csvText){
+  const lines = csvText.trim().split(/\r?\n/);
+  const head = lines.shift().split(',');
+  const idx = (k)=> head.indexOf(k);
+  const out = [];
+  for(const line of lines){
+    if(!line.trim()) continue;
+    const cols = line.split(',');
+    const row = {
+      name: cols[idx('name')]?.trim() || '',
+      state: cols[idx('state')]?.trim() || '',
+      protein: Number(cols[idx('protein')]||0),
+      fat: Number(cols[idx('fat')]||0),
+      carbs: Number(cols[idx('carbs')]||0),
+      fiber: Number(cols[idx('fiber')]||0),
+      sodium_mg: Number(cols[idx('sodium_mg')]||0),
+    };
+    out.push(row);
+  }
+  return out;
+}
+
+// เรียกโหลดฐานข้อมูลให้เสร็จก่อน แล้วค่อย setup อย่างอื่น
+window.addEventListener('DOMContentLoaded', async ()=>{
+  // (ตรงนี้คุณมีโค้ดตั้งค่าเครดิต/โลโก้/ธีมอยู่แล้ว ไม่ต้องแก้)
+  await loadDB();
+
+  // ถ้ามี <datalist id="ing-list"> ให้รีเฟรชรายการจาก DB
+  const dl = document.getElementById('ing-list');
+  if(dl){
+    dl.innerHTML = DB.map(d=>`<option value="${d.name}">`).join('');
+  }
+
+  // ค่อยคำนวณ/รีเฟรชหน้าจอหลัง DB มาแล้ว
+  compute();
+});
+</script>
+
 
 /* ====== Utilities ====== */
 const $ = (s)=>document.querySelector(s);
