@@ -1,89 +1,78 @@
 <!DOCTYPE html>
-<html lang="th" data-theme="light">
+<html lang="th">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Nutrition Finder | ค้นหาคุณค่าโภชนาการ</title>
-  <meta name="description" content="ค้นหาข้อมูลโภชนาการจาก OpenFoodFacts บน GitHub Pages (Static Web App)" />
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
-  <style>
-    :root{ --radius:18px; --shadow:0 10px 30px rgba(15,23,42,.08); }
-    :root,[data-theme="light"]{
-      --bg:#f6f8fc; --text:#0f172a; --muted:#5b677a; --card:#ffffff; --border:#e8edf3;
-      --accent:#2563eb; --accent-weak:#e9f0ff; --chip:#f3f6fb; --chip-border:#e5ebf4; --link:#0b5ad9;
-      --glass: rgba(255,255,255,.65);
-    }
-    [data-theme="dark"]{
-      --bg:#0b1220; --text:#e7ecf5; --muted:#8ea0bd; --card:#111827; --border:#1f2a44;
-      --accent:#74c0fc; --accent-weak:#0c2d4f; --chip:#0f1729; --chip-border:#223154; --link:#a6c8ff;
-      --glass: rgba(17,24,39,.55);
-    }
-    *{box-sizing:border-box}
-    html,body{height:100%}
-    body{margin:0;font-family:Inter,system-ui,Segoe UI,Roboto,Helvetica,Arial,sans-serif;background:radial-gradient(1200px 600px at 20% -10%, #dbeafe 0%, transparent 60%),radial-gradient(1200px 600px at 120% -10%, #ffe4e6 0%, transparent 60%),var(--bg);color:var(--text)}
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Nutrition Finder | ค้นหาคุณค่าโภชนาการ</title>
+<meta name="description" content="ค้นหาข้อมูลโภชนาการจาก OpenFoodFacts บน GitHub Pages" />
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#F6F8FC; --text:#111827; --muted:#6B7280; --card:#FFFFFF; --border:#E5E9F2;
+  --accent:#0EA5E9; --danger:#EF4444; --chip:#F3F6FB; --chip-border:#E5EBF4;
+  --radius:18px; --shadow:0 10px 30px rgba(17,24,39,.08);
+}
+*{box-sizing:border-box} html,body{height:100%}
+body{margin:0;font-family:Inter,system-ui,Segoe UI,Roboto,Arial;background:var(--bg);color:var(--text)}
+/* topbar */
+.topbar{position:sticky;top:0;z-index:10;background:#fffcc000; backdrop-filter: blur(8px); border-bottom:1px solid var(--border)}
+.container{max-width:1100px;margin:0 auto;padding:0 20px}
+.topbar .wrap{display:flex;align-items:center;gap:14px;min-height:66px}
+.logo{display:inline-flex;align-items:center;gap:10px;text-decoration:none;color:inherit}
+.logo .dot{width:12px;height:12px;border-radius:999px;background:var(--accent)}
+.title{font-weight:800;font-size:18px;letter-spacing:.2px}
+.credit-top{margin-left:auto;font-size:13px;color:var(--muted)}
+.theme-btn{margin-left:8px;border:1px solid var(--border);background:var(--card);color:var(--text);padding:8px 10px;border-radius:12px;cursor:pointer}
 
-    .topbar{position:sticky;top:0;z-index:10;background:var(--glass);backdrop-filter: blur(10px);border-bottom:1px solid var(--border)}
-    .container{max-width:1100px;margin:0 auto;padding:0 20px}
-    .topbar .wrap{display:flex;align-items:center;gap:14px;min-height:66px}
-    .logo{display:inline-flex;align-items:center;gap:10px;text-decoration:none;color:inherit}
-    .logo .dot{width:12px;height:12px;border-radius:999px;background:var(--accent)}
-    .title{font-weight:800;font-size:18px;letter-spacing:.2px}
-    .credit-top{margin-left:auto;font-size:13px;color:var(--muted)}
-    .theme-btn{margin-left:8px;border:1px solid var(--border);background:var(--card);color:var(--text);padding:8px 10px;border-radius:12px;cursor:pointer}
+/* identity */
+.brandstrip{display:flex;gap:16px;align-items:center;flex-wrap:wrap;margin:14px 0}
+.brandstrip img{height:40px;object-fit:contain}
 
-    .brandstrip{display:flex;gap:16px;align-items:center;flex-wrap:wrap;margin:14px 0}
-    .brandstrip img{height:40px;object-fit:contain}
-    [data-theme="dark"] .brandstrip img{filter:brightness(1) contrast(1.05)}
+/* hero */
+.hero{padding:28px 0 10px}
+.hero h1{font-size:clamp(26px,3.2vw,40px);margin:6px 0 8px}
+.hero .sub{margin:0;color:var(--muted)}
+.searchbar{margin:18px 0 10px;display:grid;grid-template-columns:1fr auto;gap:10px}
+input[type="search"]{width:100%;padding:16px;border:1px solid var(--border);border-radius:16px;background:var(--card);outline:none;box-shadow:var(--shadow)}
+input[type="search"]:focus{border-color:var(--accent);box-shadow:0 0 0 4px rgba(14,165,233,.18)}
+button.primary{border:0;background:var(--accent);color:#fff;padding:14px 18px;border-radius:14px;font-weight:700;cursor:pointer;box-shadow:var(--shadow)}
+.options{color:var(--muted);display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.pill{background:#fff;border:1px solid var(--border);border-radius:999px;padding:8px 12px;font-size:12px}
 
-    header.hero{padding:28px 0 10px}
-    header.hero h1{font-size:clamp(26px,3.2vw,40px);margin:6px 0 10px}
-    header.hero .sub{margin:0;color:var(--muted)}
+/* CTA */
+.btn{display:inline-flex;align-items:center;gap:8px;border:1px solid var(--border);background:var(--card);color:var(--text);padding:10px 12px;border-radius:12px;cursor:pointer;text-decoration:none}
+.btn:hover{transform:translateY(-1px)}
 
-    .searchbar{margin:18px 0 8px;display:grid;grid-template-columns:1fr auto;gap:10px}
-    input[type="search"]{width:100%;padding:16px 16px;border-radius:16px;border:1px solid var(--border);background:var(--card);color:var(--text);outline:none;box-shadow:var(--shadow)}
-    input[type="search"]:focus{border-color:var(--accent);box-shadow:0 0 0 4px var(--accent-weak)}
-    button.primary{border:0;background:var(--accent);color:#fff;padding:14px 18px;border-radius:14px;font-weight:700;cursor:pointer;box-shadow:var(--shadow)}
-    button.primary:hover{filter:brightness(.97)}
+/* results */
+.results{margin:20px 0 70px;display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:18px}
+.card{background:var(--card);border:1px solid var(--border);border-radius:20px;overflow:hidden;display:flex;flex-direction:column;box-shadow:var(--shadow)}
+.card .imgwrap{background:var(--chip);height:180px;display:flex;align-items:center;justify-content:center}
+.card img{max-height:100%;max-width:100%;object-fit:contain}
+.card .body{padding:14px 14px 12px}
+.name{font-weight:700;margin:0 0 6px;font-size:16px}
+.brand{color:var(--muted);font-size:13px;margin-bottom:10px}
+.nutri{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:6px}
+.chip{background:var(--chip);border:1px solid var(--chip-border);border-radius:12px;padding:10px 12px;font-size:13px;display:flex;justify-content:space-between;gap:8px}
+.actions{display:flex;gap:8px;margin-top:12px}
+.btn-ghost{border:1px solid var(--border);background:var(--card);color:var(--text);padding:8px 10px;border-radius:10px;cursor:pointer;text-decoration:none}
+.loader{display:none;place-items:center;margin:24px auto;color:var(--muted)}
+.empty{color:var(--muted);text-align:center;margin:26px 0}
 
-    .options{color:var(--muted);display:flex;gap:10px;align-items:center;flex-wrap:wrap}
-    .pill{background:var(--glass);border:1px solid var(--border);border-radius:999px;padding:8px 12px;font-size:12px;backdrop-filter: blur(6px)}
-
-    .cta-row{margin-top:12px}
-    .btn{display:inline-flex;align-items:center;gap:8px;border:1px solid var(--border);background:var(--card);color:var(--text);padding:10px 12px;border-radius:12px;cursor:pointer;text-decoration:none}
-    .btn:hover{transform:translateY(-1px)}
-
-    .results{margin:20px 0 70px;display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:18px}
-    .card{background:var(--card);border:1px solid var(--border);border-radius:20px;overflow:hidden;display:flex;flex-direction:column;box-shadow:var(--shadow)}
-    .card .imgwrap{background:var(--chip);height:180px;display:flex;align-items:center;justify-content:center}
-    .card img{max-height:100%;max-width:100%;object-fit:contain}
-    .card .body{padding:14px 14px 12px}
-    .name{font-weight:700;margin:0 0 6px;font-size:16px}
-    .brand{color:var(--muted);font-size:13px;margin-bottom:10px}
-    .nutri{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:6px}
-    .chip{background:var(--chip);border:1px solid var(--chip-border);border-radius:12px;padding:10px 12px;font-size:13px;display:flex;justify-content:space-between;gap:8px}
-    .muted{color:var(--muted)}
-    .actions{display:flex;gap:8px;margin-top:12px}
-    .btn-ghost{border:1px solid var(--border);background:var(--card);color:var(--text);padding:8px 10px;border-radius:10px;cursor:pointer;text-decoration:none}
-
-    .loader{display:none;place-items:center;margin:24px auto;color:var(--muted)}
-    .empty{color:var(--muted);text-align:center;margin:26px 0}
-
-    footer{border-top:1px solid var(--border);padding:18px 0 40px;color:var(--muted);font-size:13px}
-    .credit-bottom{margin-top:6px}
-
-    a{color:var(--link)}
-    .sr{position:absolute;left:-10000px;top:auto;width:1px;height:1px;overflow:hidden}
-  </style>
+/* footer */
+footer{border-top:1px solid var(--border);padding:18px 0 40px;color:var(--muted);font-size:13px}
+.credit-bottom{margin-top:6px}
+a{color:#0EA5E9}
+.sr{position:absolute;left:-10000px;top:auto;width:1px;height:1px;overflow:hidden}
+</style>
 </head>
 <body>
   <div class="topbar">
     <div class="container">
       <div class="wrap">
         <a class="logo" href="#" aria-label="Home">
-          <span class="dot"></span>
-          <span class="title">Nutrition Finder</span>
+          <span class="dot"></span><span class="title">Nutrition Finder</span>
         </a>
         <div class="credit-top" id="creditTop"></div>
         <button class="theme-btn" id="themeToggle" title="สลับธีม">สลับธีม</button>
@@ -100,29 +89,27 @@
 
     <header class="hero" role="banner">
       <h1>ค้นหาคุณค่าโภชนาการ</h1>
-      <p class="sub">ดึงข้อมูลจากฐานสาธารณะ <a href="https://world.openfoodfacts.org/" target="_blank" rel="noopener">OpenFoodFacts</a> แบบเรียลไทม์ · เว็บสแตติกบน GitHub Pages</p>
+      <p class="sub">ดึงข้อมูลจาก <a href="https://world.openfoodfacts.org/" target="_blank" rel="noopener">OpenFoodFacts</a> แบบเรียลไทม์ · Static Web</p>
 
       <form class="searchbar" id="searchForm">
         <label class="sr" for="q">คำค้นหา</label>
-        <input id="q" type="search" placeholder="พิมพ์ชื่ออาหาร/ผลิตภัณฑ์ เช่น yogurt, rice, chocolate…" autocomplete="off" />
+        <input id="q" type="search" placeholder="เช่น yogurt, rice, chocolate…" autocomplete="off" />
         <button class="primary" id="btnSearch" type="submit">ค้นหา</button>
       </form>
 
       <div class="options">
-        <span class="pill" title="จำนวนผลลัพธ์ต่อหน้า">ผล/หน้า
+        <span class="pill">ผล/หน้า
           <select id="pageSize" style="background:transparent;border:0;color:inherit">
-            <option>10</option>
-            <option selected>20</option>
-            <option>50</option>
+            <option>10</option><option selected>20</option><option>50</option>
           </select>
         </span>
-        <span class="pill">หน่วยต่อ 100 g (ตามฉลาก)</span>
-        <label class="pill" for="thOnly" title="กรองเฉพาะรายการในประเทศไทย">
+        <span class="pill">หน่วยต่อ 100 g</span>
+        <label class="pill" for="thOnly" title="กรองเฉพาะข้อมูลในไทย">
           <input id="thOnly" type="checkbox" style="margin-right:6px"> เฉพาะข้อมูลในไทย
         </label>
       </div>
 
-      <div class="cta-row">
+      <div style="margin-top:12px">
         <a class="btn" href="calculator.html">🧮 ไปหน้าเครื่องคิดโภชนาการด้วยตนเอง</a>
       </div>
 
@@ -135,7 +122,7 @@
 
   <footer>
     <div class="container">
-      <div>แหล่งข้อมูล: OpenFoodFacts (สาธารณะ). ค่าที่แสดงเป็น <em>per 100 g</em> จากฉลากผู้ผลิต</div>
+      <div>แหล่งข้อมูล: OpenFoodFacts (สาธารณะ) · ค่าเป็น <em>per 100 g</em> จากฉลากผู้ผลิต</div>
       <div class="credit-bottom" id="creditBottom"></div>
     </div>
   </footer>
@@ -144,55 +131,40 @@
 const API_SEARCH = 'https://world.openfoodfacts.org/cgi/search.pl';
 const IMG_FALLBACK = 'https://static.openfoodfacts.org/images/icons/dist/product-add.svg';
 
-// เครดิต/โลโก้
+/* เครดิต/โลโก้ */
 const CREDIT_TEXT = "ผู้จัดทำ: ครูศักดิ์สิทธิ์ บำรุง | แผนกวิชาอาหารและโภชนาการ วิทยาลัยอาชีวศึกษาสุโขทัย | © 2025";
 const LOGOS = ["assets/img/logo1.png","assets/img/logo2.png","assets/img/logo3.png"];
 
+/* ธีม (light/dark แบบง่าย) */
 const root = document.documentElement;
 function applyTheme(t){ root.setAttribute('data-theme', t); localStorage.setItem('nf-theme', t); }
-function toggleTheme(){ const cur = root.getAttribute('data-theme')||'light'; applyTheme(cur==='light'?'dark':'light'); }
+function toggleTheme(){ const cur = localStorage.getItem('nf-theme')||'light'; applyTheme(cur==='light'?'dark':'light'); }
 (function initTheme(){ applyTheme(localStorage.getItem('nf-theme')||'light'); })();
 document.getElementById('themeToggle').addEventListener('click', toggleTheme);
 
-function safeSetLogo(id, src){
-  const el = document.getElementById(id);
-  if(!el) return;
-  el.onerror = () => { el.style.display = 'none'; };
-  if(src) el.src = src;
-}
+/* โลโก้ปลอดภัย */
+function safeSetLogo(id, src){ const el = document.getElementById(id); if(!el) return; el.onerror=()=>{el.style.display='none'}; if(src) el.src=src; }
 
+/* DOM Ready */
 window.addEventListener('DOMContentLoaded',()=>{
-  const top = document.getElementById('creditTop');
-  const bottom = document.getElementById('creditBottom');
-  if(top) top.textContent = CREDIT_TEXT;
-  if(bottom) bottom.textContent = CREDIT_TEXT;
-
   const [l1,l2,l3] = LOGOS;
-  safeSetLogo('logo1', l1);
-  safeSetLogo('logo2', l2);
-  safeSetLogo('logo3', l3);
-
+  safeSetLogo('logo1', l1); safeSetLogo('logo2', l2); safeSetLogo('logo3', l3);
+  document.getElementById('creditTop').textContent = CREDIT_TEXT;
+  document.getElementById('creditBottom').textContent = CREDIT_TEXT;
   document.getElementById('q').focus();
 });
 
-const $ = (sel)=>document.querySelector(sel);
-function fmt(num, digits=1){ if(num===undefined || num===null || Number.isNaN(num)) return '–'; return Number(num).toFixed(digits); }
-function makeChip(label, value, unit=''){ return `<div class="chip"><span>${label}</span><strong>${value} ${unit}</strong></div>`; }
-
+/* Utils */
+const $=(s)=>document.querySelector(s);
+function fmt(num, d=1){ if(num==null||Number.isNaN(num)) return '–'; return Number(num).toFixed(d); }
+function chip(label, value, unit=''){ return `<div class="chip"><span>${label}</span><strong>${value} ${unit}</strong></div>`; }
 function buildNutritionText(p){
   const N = p.nutriments||{};
   const name = p.product_name_th || p.generic_name_th || p.product_name || p.generic_name || '-';
   const brand = p.brands || '-';
   const energy = N['energy-kcal_100g'] ?? (N['energy_100g']? N['energy_100g']/4.184 : undefined);
-  const protein = N['proteins_100g'];
-  const fat = N['fat_100g'];
-  const carbs = N['carbohydrates_100g'];
-  const sugars = N['sugars_100g'];
-  const fiber = N['fiber_100g'];
-  const sodium = N['sodium_100g'];
-  const salt = N['salt_100g'];
-  return (
-`ชื่อผลิตภัณฑ์: ${name}
+  const protein=N['proteins_100g'], fat=N['fat_100g'], carbs=N['carbohydrates_100g'], sugars=N['sugars_100g'], fiber=N['fiber_100g'], sodium=N['sodium_100g'], salt=N['salt_100g'];
+  return `ชื่อผลิตภัณฑ์: ${name}
 ยี่ห้อ: ${brand}
 ต่อ 100 g:
 - พลังงาน: ${fmt(energy)} kcal
@@ -203,108 +175,78 @@ function buildNutritionText(p){
 - ใยอาหาร: ${fmt(fiber)} g
 - โซเดียม: ${sodium!=null?fmt(sodium*1000):'–'} mg
 - เกลือ: ${fmt(salt)} g
-แหล่งข้อมูล: OpenFoodFacts`
-  );
+แหล่งข้อมูล: OpenFoodFacts`;
 }
-
-async function copyNutritionFromIndex(idx){
-  const p = window.__products?.[idx];
-  if(!p) return;
+async function copyNutritionFromIndex(i){
+  const p = window.__products?.[i]; if(!p) return;
   try{ await navigator.clipboard.writeText(buildNutritionText(p)); alert('คัดลอกข้อมูลแล้ว'); }
   catch(e){ console.error(e); alert('คัดลอกไม่สำเร็จ ลองอีกครั้ง'); }
 }
 
-function renderCard(p, idx){
+/* card */
+function renderCard(p,i){
   const n = p.product_name_th || p.generic_name_th || p.product_name || p.generic_name || '(ไม่มีชื่อผลิตภัณฑ์)';
   const brand = p.brands || '—';
   const img = p.image_front_small_url || p.image_url || IMG_FALLBACK;
-  const N = p.nutriments || {};
+  const N = p.nutriments||{};
   const energy = N['energy-kcal_100g'] ?? (N['energy_100g']? N['energy_100g']/4.184 : undefined);
-  const protein = N['proteins_100g'];
-  const fat = N['fat_100g'];
-  const carbs = N['carbohydrates_100g'];
-  const sugars = N['sugars_100g'];
-  const fiber = N['fiber_100g'];
-  const sodium = N['sodium_100g'];
-  const salt = N['salt_100g'];
-  const code = p.code || '';
-  const url = code ? `https://world.openfoodfacts.org/product/${code}` : (p.url||'#');
-
-  return `
-  <article class="card">
+  const protein=N['proteins_100g'], fat=N['fat_100g'], carbs=N['carbohydrates_100g'], sugars=N['sugars_100g'], fiber=N['fiber_100g'];
+  const sodium=N['sodium_100g'], salt=N['salt_100g'];
+  const code=p.code||'', url = code?`https://world.openfoodfacts.org/product/${code}`:(p.url||'#');
+  return `<article class="card">
     <div class="imgwrap"><img alt="${n}" loading="lazy" src="${img}"></div>
     <div class="body">
       <h3 class="name">${n}</h3>
       <div class="brand">ยี่ห้อ/ผู้ผลิต: ${brand}</div>
       <div class="nutri">
-        ${makeChip('พลังงาน', fmt(energy), 'kcal')}
-        ${makeChip('โปรตีน', fmt(protein), 'g')}
-        ${makeChip('ไขมัน', fmt(fat), 'g')}
-        ${makeChip('คาร์บฯ', fmt(carbs), 'g')}
-        ${makeChip('น้ำตาล', fmt(sugars), 'g')}
-        ${makeChip('ใยอาหาร', fmt(fiber), 'g')}
-        ${makeChip('โซเดียม', sodium!=null?fmt(sodium*1000):'–', 'mg')}
-        ${makeChip('เกลือ', fmt(salt), 'g')}
+        ${chip('พลังงาน', fmt(energy), 'kcal')}
+        ${chip('โปรตีน', fmt(protein), 'g')}
+        ${chip('ไขมัน', fmt(fat), 'g')}
+        ${chip('คาร์บฯ', fmt(carbs), 'g')}
+        ${chip('น้ำตาล', fmt(sugars), 'g')}
+        ${chip('ใยอาหาร', fmt(fiber), 'g')}
+        ${chip('โซเดียม', sodium!=null?fmt(sodium*1000):'–', 'mg')}
+        ${chip('เกลือ', fmt(salt), 'g')}
       </div>
       <div class="actions">
-        <button class="btn-ghost" onclick="copyNutritionFromIndex(${idx})">คัดลอกสารอาหาร</button>
+        <button class="btn-ghost" onclick="copyNutritionFromIndex(${i})">คัดลอกสารอาหาร</button>
         <a class="btn-ghost" href="${url}" target="_blank" rel="noopener">เปิดแหล่งข้อมูล</a>
       </div>
     </div>
   </article>`;
 }
 
+/* search */
 async function searchFoods(q, pageSize=20){
   const url = new URL(API_SEARCH);
   url.searchParams.set('search_terms', q);
-  url.searchParams.set('search_simple', '1');
-  url.searchParams.set('action', 'process');
-  url.searchParams.set('json', '1');
+  url.searchParams.set('search_simple','1');
+  url.searchParams.set('action','process');
+  url.searchParams.set('json','1');
   url.searchParams.set('page_size', String(pageSize));
-  url.searchParams.set('lc', 'th');
+  url.searchParams.set('lc','th');
 
-  const thOnly = document.getElementById('thOnly')?.checked;
-  if(thOnly){
-    url.searchParams.set('tagtype_0','countries');
-    url.searchParams.set('tag_contains_0','contains');
-    url.searchParams.set('tag_0','Thailand');
-    url.searchParams.set('tagtype_1','purchase_places');
-    url.searchParams.set('tag_contains_1','contains');
-    url.searchParams.set('tag_1','Thailand');
+  if(document.getElementById('thOnly').checked){
+    url.searchParams.set('tagtype_0','countries'); url.searchParams.set('tag_contains_0','contains'); url.searchParams.set('tag_0','Thailand');
+    url.searchParams.set('tagtype_1','purchase_places'); url.searchParams.set('tag_contains_1','contains'); url.searchParams.set('tag_1','Thailand');
   }
 
-  $('#loader').style.display='grid';
-  $('#empty').textContent='';
-  $('#results').innerHTML='';
-
+  $('#loader').style.display='grid'; $('#empty').textContent=''; $('#results').innerHTML='';
   try{
-    const res = await fetch(url.toString());
-    if(!res.ok) throw new Error('Network error');
-    const data = await res.json();
-    const products = (data.products||[]).filter(p=>p.nutriments);
+    const res = await fetch(url.toString()); if(!res.ok) throw new Error('Network');
+    const data = await res.json(); const products=(data.products||[]).filter(p=>p.nutriments);
     window.__products = products;
-
-    if(products.length===0){
-      $('#empty').textContent='ไม่พบข้อมูล ลองใช้คำค้นอื่น หรือเอาติ๊ก "เฉพาะข้อมูลในไทย" ออกเพื่อขยายผลการค้นหา';
-      return;
-    }
-    const html = products.map((p,i)=>renderCard(p,i)).join('');
-    $('#results').innerHTML = html;
-  }catch(err){
-    console.error(err);
-    $('#empty').textContent='เกิดข้อผิดพลาดในการดึงข้อมูล กรุณาลองใหม่อีกครั้ง';
-  }finally{
-    $('#loader').style.display='none';
-  }
+    if(products.length===0){ $('#empty').textContent='ไม่พบข้อมูล ลองคำอื่น หรือเอาติ๊ก "เฉพาะข้อมูลในไทย" ออก'; return; }
+    $('#results').innerHTML = products.map((p,i)=>renderCard(p,i)).join('');
+  }catch(e){ console.error(e); $('#empty').textContent='เกิดข้อผิดพลาดในการดึงข้อมูล'; }
+  finally{ $('#loader').style.display='none'; }
 }
 
-const form = $('#searchForm');
-form.addEventListener('submit', (e)=>{
+document.getElementById('searchForm').addEventListener('submit',(e)=>{
   e.preventDefault();
-  const q = $('#q').value.trim();
-  if(!q){ $('#empty').textContent='โปรดพิมพ์คำค้นหา'; return; }
-  const pageSize = Number($('#pageSize').value || 20);
-  searchFoods(q, pageSize);
+  const q=$('#q').value.trim(); if(!q){ $('#empty').textContent='โปรดพิมพ์คำค้นหา'; return; }
+  const pageSize=Number($('#pageSize').value||20);
+  searchFoods(q,pageSize);
 });
 </script>
 </body>
