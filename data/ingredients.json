@@ -1,1 +1,236 @@
-
+[
+  {
+    "name": "ข้าวสารหอมมะลิ (ดิบ)",
+    "state": "raw",
+    "protein": 7.1,
+    "fat": 0.6,
+    "carbs": 78.2,
+    "fiber": 1.0,
+    "sodium_mg": 5
+  },
+  {
+    "name": "ข้าวสวยหุงสุก",
+    "state": "cooked",
+    "protein": 2.6,
+    "fat": 0.3,
+    "carbs": 28.0,
+    "fiber": 0.4,
+    "sodium_mg": 2
+  },
+  {
+    "name": "ข้าวเหนียวหุงสุก",
+    "state": "cooked",
+    "protein": 2.4,
+    "fat": 0.5,
+    "carbs": 36.0,
+    "fiber": 0.6,
+    "sodium_mg": 2
+  },
+  {
+    "name": "เส้นก๋วยเตี๋ยว (ลวกสุก)",
+    "state": "cooked",
+    "protein": 2.0,
+    "fat": 0.3,
+    "carbs": 23.0,
+    "fiber": 0.5,
+    "sodium_mg": 120
+  },
+  {
+    "name": "บะหมี่กึ่งสำเร็จรูป (ต้มสุก, ไม่ใส่เครื่องปรุง)",
+    "state": "cooked",
+    "protein": 5.0,
+    "fat": 6.0,
+    "carbs": 28.0,
+    "fiber": 1.5,
+    "sodium_mg": 20
+  },
+  {
+    "name": "อกไก่ดิบ",
+    "state": "raw",
+    "protein": 21.0,
+    "fat": 2.5,
+    "carbs": 0.0,
+    "fiber": 0.0,
+    "sodium_mg": 70
+  },
+  {
+    "name": "อกไก่ต้มสุก",
+    "state": "cooked",
+    "protein": 31.0,
+    "fat": 3.6,
+    "carbs": 0.0,
+    "fiber": 0.0,
+    "sodium_mg": 74
+  },
+  {
+    "name": "สันนอกหมูดิบ",
+    "state": "raw",
+    "protein": 20.9,
+    "fat": 6.3,
+    "carbs": 0.0,
+    "fiber": 0.0,
+    "sodium_mg": 59
+  },
+  {
+    "name": "เนื้อวัวไม่ติดมันดิบ",
+    "state": "raw",
+    "protein": 20.0,
+    "fat": 5.0,
+    "carbs": 0.0,
+    "fiber": 0.0,
+    "sodium_mg": 60
+  },
+  {
+    "name": "เต้าหู้แข็ง",
+    "state": "raw",
+    "protein": 12.0,
+    "fat": 7.0,
+    "carbs": 3.0,
+    "fiber": 1.0,
+    "sodium_mg": 14
+  },
+  {
+    "name": "ไข่ไก่ทั้งฟอง (ดิบ)",
+    "state": "raw",
+    "protein": 12.6,
+    "fat": 10.6,
+    "carbs": 1.1,
+    "fiber": 0.0,
+    "sodium_mg": 124
+  },
+  {
+    "name": "กะทิกระป๋อง",
+    "state": "raw",
+    "protein": 2.3,
+    "fat": 24.0,
+    "carbs": 3.3,
+    "fiber": 0.0,
+    "sodium_mg": 15
+  },
+  {
+    "name": "น้ำมันพืช",
+    "state": "raw",
+    "protein": 0.0,
+    "fat": 100.0,
+    "carbs": 0.0,
+    "fiber": 0.0,
+    "sodium_mg": 0
+  },
+  {
+    "name": "น้ำปลา",
+    "state": "raw",
+    "protein": 0.0,
+    "fat": 0.0,
+    "carbs": 0.0,
+    "fiber": 0.0,
+    "sodium_mg": 7000
+  },
+  {
+    "name": "ซีอิ๊วขาว",
+    "state": "raw",
+    "protein": 5.0,
+    "fat": 0.0,
+    "carbs": 5.0,
+    "fiber": 0.0,
+    "sodium_mg": 5600
+  },
+  {
+    "name": "น้ำตาลทราย",
+    "state": "raw",
+    "protein": 0.0,
+    "fat": 0.0,
+    "carbs": 100.0,
+    "fiber": 0.0,
+    "sodium_mg": 0
+  },
+  {
+    "name": "น้ำตาลมะพร้าว/น้ำตาลปี๊บ",
+    "state": "raw",
+    "protein": 0.2,
+    "fat": 0.2,
+    "carbs": 98.0,
+    "fiber": 0.0,
+    "sodium_mg": 18
+  },
+  {
+    "name": "กระเทียมสด",
+    "state": "raw",
+    "protein": 6.4,
+    "fat": 0.5,
+    "carbs": 33.0,
+    "fiber": 2.1,
+    "sodium_mg": 17
+  },
+  {
+    "name": "หอมหัวแดง",
+    "state": "raw",
+    "protein": 1.7,
+    "fat": 0.1,
+    "carbs": 17.0,
+    "fiber": 3.0,
+    "sodium_mg": 12
+  },
+  {
+    "name": "พริกชี้ฟ้าแดงสด",
+    "state": "raw",
+    "protein": 1.9,
+    "fat": 0.4,
+    "carbs": 9.5,
+    "fiber": 1.5,
+    "sodium_mg": 7
+  },
+  {
+    "name": "ผักชี",
+    "state": "raw",
+    "protein": 2.1,
+    "fat": 0.5,
+    "carbs": 3.7,
+    "fiber": 2.8,
+    "sodium_mg": 46
+  },
+  {
+    "name": "น้ำมะนาวสด",
+    "state": "raw",
+    "protein": 0.4,
+    "fat": 0.2,
+    "carbs": 8.6,
+    "fiber": 0.3,
+    "sodium_mg": 2
+  },
+  {
+    "name": "มะขามเปียก",
+    "state": "raw",
+    "protein": 2.8,
+    "fat": 0.6,
+    "carbs": 67.0,
+    "fiber": 5.1,
+    "sodium_mg": 28
+  },
+  {
+    "name": "กล้วยน้ำว้าสุก",
+    "state": "raw",
+    "protein": 1.2,
+    "fat": 0.3,
+    "carbs": 27.0,
+    "fiber": 2.6,
+    "sodium_mg": 1
+  },
+  {
+    "name": "มะม่วงสุก",
+    "state": "raw",
+    "protein": 0.8,
+    "fat": 0.4,
+    "carbs": 15.0,
+    "fiber": 1.6,
+    "sodium_mg": 2
+  },
+  {
+    "name": "มะละกอสุก",
+    "state": "raw",
+    "protein": 0.5,
+    "fat": 0.1,
+    "carbs": 10.8,
+    "fiber": 1.7,
+    "sodium_mg": 8
+  }
+]
