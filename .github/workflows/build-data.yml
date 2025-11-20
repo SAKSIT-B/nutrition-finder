@@ -1,15 +1,24 @@
 name: Build Nutrition Data (ThaiFCD)
 
 on:
-  workflow_dispatch: {}   # กดรันเองเมื่อไหร่ก็ได้
+  workflow_dispatch: {}
   # schedule:
-  #   - cron: "0 18 * * 0"  # ตัวอย่าง: ทุกอาทิตย์ 01:00 ICT (ปรับตามความเหมาะสม)
+  #   - cron: "0 18 * * 0"  # ตัวอย่าง: ทุกอาทิตย์ 01:00 ICT
 
 jobs:
   build:
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     permissions:
       contents: write
+
+    env:
+      # ตั้งค่า network/keywords ได้จากตรงนี้
+      CONNECT_TIMEOUT: "15"
+      read_TIMEOUT: "45"
+      MAX_TOTAL_RETRIES: "5"
+      BACKOFF_FACTOR: "1.5"
+      KEYWORDS: "ข้าว,ปลา,กุ้ง,หมู,ไก่,นม,ผัก,ผลไม้,เต้าหู้,ซีอิ๊ว,น้ำปลา,กะทิ"
 
     steps:
       - name: Checkout
@@ -23,10 +32,28 @@ jobs:
       - name: Install deps
         run: pip install -r requirements.txt
 
-      - name: Scrape ThaiFCD -> data/ingredients.json
-        run: python scripts/scrape_thaifcd.py
+      - name: Scrape ThaiFCD with retries
+        run: |
+          set -e
+          max=4
+          n=1
+          until [ $n -gt $max ]
+          do
+            echo "Attempt $n/$max..."
+            if python scripts/scrape_thaifcd.py; then
+              echo "Success"
+              break
+            fi
+            echo "Failed attempt $n"
+            sleep $(( 20 * n ))  # backoff 20s,40s,60s...
+            n=$((n+1))
+          done
+          if [ $n -gt $max ]; then
+            echo "All attempts failed" >&2
+            exit 1
+          fi
 
-      - name: Commit and push data
+      - name: Commit and push data (if changed)
         run: |
           if [ -n "$(git status --porcelain)" ]; then
             git config user.name "github-actions[bot]"
