@@ -1,10 +1,9 @@
 # scripts/scrape_thaifcd.py
 # -*- coding: utf-8 -*-
 """
-Scrape ThaiFCD -> data/ingredients.json
-- คงค่าตามหน้า (amount+unit) / ไม่คำนวณเพิ่ม
-- ใช้ชื่อสารอาหาร/หัวข้อ section ให้เหมือนเว็บ 100%
-- อัปเดต: เพิ่ม retry/backoff + timeouts + เขียนไฟล์แบบ atomic
+Scrape ThaiFCD -> data/ingredients.json (atomic write)
+- ถ้าดึงไม่ได้เลย: ไม่เขียนทับไฟล์เดิม และ exit 0 เพื่อไม่ทำให้ workflow แดง
+- เก็บ key/section ตามหน้าเว็บจริง (Main nutrients, Minerals, Vitamins)
 """
 import os, time, json, re, random, sys
 from pathlib import Path
@@ -20,51 +19,49 @@ from nutrients_map_site import map_header_to_site_key
 BASE   = "https://thaifcd.anamai.moph.go.th/nss/"
 SEARCH = urljoin(BASE, "search.php")
 
-# --- ตั้งค่า Network ทน ๆ ---
-CONNECT_TIMEOUT = float(os.getenv("CONNECT_TIMEOUT", "15"))   # sec
-READ_TIMEOUT    = float(os.getenv("read_TIMEOUT", "45"))      # sec
-TIMEOUT = (CONNECT_TIMEOUT, READ_TIMEOUT)  # (connect, read)
+# --- Network settings (เพิ่มเวลาให้เยอะขึ้น) ---
+CONNECT_TIMEOUT = float(os.getenv("CONNECT_TIMEOUT", "30"))
+READ_TIMEOUT    = float(os.getenv("READ_TIMEOUT", "120"))
+TIMEOUT = (CONNECT_TIMEOUT, READ_TIMEOUT)
 
-MAX_TOTAL_RETRIES = int(os.getenv("MAX_TOTAL_RETRIES", "5"))
-BACKOFF_FACTOR    = float(os.getenv("BACKOFF_FACTOR", "1.5"))
+MAX_TOTAL_RETRIES = int(os.getenv("MAX_TOTAL_RETRIES", "6"))
+BACKOFF_FACTOR    = float(os.getenv("BACKOFF_FACTOR", "2.0"))
 STATUS_FORCELIST  = [429, 500, 502, 503, 504]
 ALLOWED_METHODS   = frozenset({"GET"})
 
 HEADERS = {
-    "User-Agent": "Mozilla/5.0 (compatible; NutritionFinder/1.0; +github-pages)",
+    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) NutritionFinder/1.0 Safari/537.36",
     "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
 }
 
-# ตั้งค่า keywords (แก้ได้ผ่าน ENV KEYWORDS="ข้าว,ปลา,...")
-DEFAULT_KEYWORDS = ["ข้าว", "ปลา", "กุ้ง", "หมู", "ไก่", "นม", "ผัก", "ผลไม้", "เต้าหู้", "ซีอิ๊ว", "น้ำปลา", "กะทิ"]
-_env_keywords = [s.strip() for s in os.getenv("KEYWORDS", "").split(",") if s.strip()]
+DEFAULT_KEYWORDS = ["ข้าว","ปลา","กุ้ง","หมู","ไก่","นม","ผัก","ผลไม้","เต้าหู้","ซีอิ๊ว","น้ำปลา","กะทิ"]
+_env_keywords = [s.strip() for s in os.getenv("KEYWORDS","").split(",") if s.strip()]
 KEYWORDS = _env_keywords or DEFAULT_KEYWORDS
 
 OUT_PATH = Path("data/ingredients.json")
 TMP_PATH = Path("data/ingredients.json.tmp")
 OUT_PATH.parent.mkdir(parents=True, exist_ok=True)
 
-# --- สุ่มหน่วงเวลาเล็กน้อย (jitter) ระหว่างคำขอ ---
-def sleep_jitter(base=1.5, spread=1.0):
-    time.sleep(base + random.random() * spread)
+def sleep_jitter(base=2.0, spread=2.0):
+    time.sleep(base + random.random()*spread)
 
 def build_session():
-    sess = requests.Session()
-    sess.headers.update(HEADERS)
+    s = requests.Session()
+    s.headers.update(HEADERS)
     retry = Retry(
         total=MAX_TOTAL_RETRIES,
         connect=MAX_TOTAL_RETRIES,
         read=MAX_TOTAL_RETRIES,
-        backoff_factor=BACKOFF_FACTOR,     # 1.5, 3.0, 4.5, ...
+        backoff_factor=BACKOFF_FACTOR,
         status_forcelist=STATUS_FORCELIST,
         allowed_methods=ALLOWED_METHODS,
         raise_on_status=False,
         respect_retry_after_header=True,
     )
     adapter = HTTPAdapter(max_retries=retry, pool_connections=10, pool_maxsize=10)
-    sess.mount("https://", adapter)
-    sess.mount("http://", adapter)
-    return sess
+    s.mount("https://", adapter)
+    s.mount("http://", adapter)
+    return s
 
 session = build_session()
 
@@ -77,8 +74,7 @@ def extract_search_rows(html):
     soup = BeautifulSoup(html, "html.parser")
     table = soup.find("table")
     items = []
-    if not table:
-        return items
+    if not table: return items
     trs = table.select("tr")
     for tr in trs[1:]:
         tds = tr.find_all("td")
@@ -105,7 +101,6 @@ def parse_basis(soup):
 
 def parse_detail_page(html, url):
     soup = BeautifulSoup(html, "html.parser")
-
     title_el = soup.find(["h1","h2"])
     item_name = title_el.get_text(strip=True) if title_el else "(ไม่พบชื่อ)"
 
@@ -125,16 +120,14 @@ def parse_detail_page(html, url):
     if table:
         for tr in table.find_all("tr"):
             cells = tr.find_all(["th","td"])
-            if not cells: 
-                continue
-            # หัว section
+            if not cells: continue
+            # section header
             if len(cells) == 1 or (cells[0].name == "th" and cells[0].get("colspan")):
                 sec_name = cells[0].get_text(strip=True)
                 if sec_name in ("Main nutrients","Minerals","Vitamins"):
                     cur_section = sec_name
                 continue
-            if len(cells) < 3:
-                continue
+            if len(cells) < 3: continue
 
             head = cells[0].get_text(" ", strip=True)
             amt  = cells[1].get_text(" ", strip=True)
@@ -180,8 +173,7 @@ def scrape_keyword(keyword):
 
     items = []
     for r in rows:
-        if not r.get("detail_url"):
-            continue
+        if not r.get("detail_url"): continue
         try:
             d = get(r["detail_url"])
             item = parse_detail_page(d.text, d.url)
@@ -195,7 +187,7 @@ def scrape_keyword(keyword):
 def main():
     all_items, seen = [], set()
 
-    # preflight: ping BASE แบบไว ๆ (ไม่ล้มงานถ้าไม่ผ่าน)
+    # preflight: ถ้าฐานไม่ติด อย่าล้มงาน
     try:
         _ = get(BASE)
     except Exception as e:
@@ -207,14 +199,22 @@ def main():
             key = (it["name"], it["source_url"])
             if key in seen: 
                 continue
-            seen.add(key)
-            all_items.append(it)
+            seen.add(key); all_items.append(it)
 
-        # เขียนแบบ incremental กันงานหลุดแล้วไฟล์หาย
+        # incremental save
         TMP_PATH.write_text(json.dumps(all_items, ensure_ascii=False, indent=2), encoding="utf-8")
         TMP_PATH.replace(OUT_PATH)
 
+    if len(all_items) == 0:
+        # ไม่มีข้อมูลใหม่เลย -> ไม่เขียนทับไฟล์เดิม (ถ้ามี) และจบแบบ exit 0
+        if TMP_PATH.exists():
+            try: TMP_PATH.unlink()
+            except: pass
+        print("[!] No items scraped. Keep previous data/ingredients.json as-is.")
+        sys.exit(0)
+
     print(f"Saved {len(all_items)} items -> {OUT_PATH}")
+    sys.exit(0)
 
 if __name__ == "__main__":
     main()
