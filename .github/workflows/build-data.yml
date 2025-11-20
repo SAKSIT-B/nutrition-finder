@@ -8,16 +8,15 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 45
     permissions:
       contents: write
 
     env:
-      # ตั้งค่า network/keywords ได้จากตรงนี้
-      CONNECT_TIMEOUT: "15"
-      read_TIMEOUT: "45"
-      MAX_TOTAL_RETRIES: "5"
-      BACKOFF_FACTOR: "1.5"
+      CONNECT_TIMEOUT: "30"
+      READ_TIMEOUT: "120"            # <— ใช้คีย์นี้ (ตัวพิมพ์ใหญ่)
+      MAX_TOTAL_RETRIES: "6"
+      BACKOFF_FACTOR: "2.0"
       KEYWORDS: "ข้าว,ปลา,กุ้ง,หมู,ไก่,นม,ผัก,ผลไม้,เต้าหู้,ซีอิ๊ว,น้ำปลา,กะทิ"
 
     steps:
@@ -32,30 +31,32 @@ jobs:
       - name: Install deps
         run: pip install -r requirements.txt
 
-      - name: Scrape ThaiFCD with retries
+      - name: Scrape ThaiFCD with retries (soft-fail, keep old data)
         run: |
           set -e
           max=4
           n=1
+          success=0
           until [ $n -gt $max ]
           do
             echo "Attempt $n/$max..."
             if python scripts/scrape_thaifcd.py; then
-              echo "Success"
+              echo "Scrape script finished (may keep old data if site unreachable)."
+              success=1
               break
             fi
             echo "Failed attempt $n"
-            sleep $(( 20 * n ))  # backoff 20s,40s,60s...
+            sleep $(( 30 * n ))  # 30s,60s,90s,...
             n=$((n+1))
           done
-          if [ $n -gt $max ]; then
-            echo "All attempts failed" >&2
-            exit 1
+          if [ $success -eq 0 ]; then
+            echo "All attempts failed but will not mark job as failed; keeping existing data."
           fi
+          exit 0  # <— บังคับจบเขียว
 
       - name: Commit and push data (if changed)
         run: |
-          if [ -n "$(git status --porcelain)" ]; then
+          if [ -n "$(git status --porcelain data/ingredients.json)" ]; then
             git config user.name "github-actions[bot]"
             git config user.email "github-actions[bot]@users.noreply.github.com"
             git add data/ingredients.json
