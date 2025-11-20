@@ -35,9 +35,9 @@
     .theme-btn,.menu-btn{border:1px solid var(--border);background:var(--card);color:var(--text);padding:8px 10px;border-radius:10px;cursor:pointer}
     .menu-btn{margin-right:6px}
 
-    /* Sidebar overlay */
+    /* Sidebar overlay (LEFT) */
     .overlay{position:fixed;inset:0;background:var(--overlay);opacity:0;pointer-events:none;transition:.25s;z-index:30}
-    .sidebar{position:fixed;inset:0 0 0 auto;width:280px;max-width:80vw;background:var(--card);color:var(--text);border-left:1px solid var(--border);transform:translateX(100%);transition:transform .25s;z-index:31;display:flex;flex-direction:column}
+    .sidebar{position:fixed;inset:0 auto 0 0;width:280px;max-width:80vw;background:var(--card);color:var(--text);border-right:1px solid var(--border);transform:translateX(-100%);transition:transform .25s;z-index:31;display:flex;flex-direction:column}
     .sidebar header{padding:14px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
     .sidebar nav{padding:10px 8px;display:flex;flex-direction:column;gap:6px}
     .navlink{padding:10px 12px;border-radius:12px;text-decoration:none;color:inherit;border:1px solid transparent}
@@ -85,7 +85,7 @@
   </style>
 </head>
 <body>
-  <!-- Overlay + Sidebar -->
+  <!-- Overlay + Sidebar (LEFT) -->
   <div class="overlay" id="overlay"></div>
   <aside class="sidebar" id="sidebar">
     <header>
@@ -128,7 +128,7 @@
 
       <form class="searchbar" id="searchForm">
         <label class="sr" for="q">คำค้นหา</label>
-        <input id="q" type="search" placeholder="พิมพ์ชื่ออาหาร/ผลิตภัณฑ์ เช่น yogurt, rice, chocolate…" autocomplete="off" />
+        <input id="q" type="search" placeholder="พิมพ์ชื่ออาหาร/ผลิตภัณฑ์" autocomplete="off" />
         <button class="primary" id="btnSearch" type="submit">ค้นหา</button>
       </form>
 
@@ -179,7 +179,7 @@ document.getElementById('themeToggle').addEventListener('click',toggleTheme);
 function safeSetLogo(id,src){ const el=document.getElementById(id); if(!el) return; el.onerror=()=>{el.style.display='none'}; if(src) el.src=src; }
 function $(s){return document.querySelector(s)}
 
-/* Sidebar overlay */
+/* Sidebar overlay (LEFT) */
 const sidebar=$('#sidebar'), overlay=$('#overlay');
 $('#openSidebar').addEventListener('click',()=>{sidebar.classList.add('show');overlay.classList.add('show')});
 $('#closeSidebar').addEventListener('click',()=>{sidebar.classList.remove('show');overlay.classList.remove('show')});
@@ -195,8 +195,7 @@ window.addEventListener('DOMContentLoaded',()=>{
   $('#q').focus();
 });
 
-/* ===== ค้นหา (ข้อความ/ผลลัพธ์สวย ๆ) =====
-   หมายเหตุ: ลบการอ้างถึงชื่อ/ลิงก์ผู้ให้ข้อมูลออกจาก UI แล้ว  */
+/* ===== ค้นหา (ตัวอย่าง UI—ลบการอ้างลิงก์ภายนอกแล้ว) ===== */
 const API_SEARCH='https://world.openfoodfacts.org/cgi/search.pl';
 const IMG_FALLBACK='https://static.openfoodfacts.org/images/icons/dist/product-add.svg';
 function fmt(n,d=1){ if(n==null||Number.isNaN(n)) return '–'; return Number(n).toFixed(d); }
@@ -209,8 +208,7 @@ function renderCard(p){
   const N = p.nutriments || {};
   const energy = N['energy-kcal_100g'] ?? (N['energy_100g']? N['energy_100g']/4.184 : undefined);
   const protein = N['proteins_100g'], fat = N['fat_100g'], carbs = N['carbohydrates_100g'];
-  const sugars = N['sugars_100g'], fiber = N['fiber_100g']; const sodium=N['sodium_100g'], salt=N['salt_100g'];
-  const code = p.code || ''; const url = code ? `#` : '#'; // ไม่โชว์ลิงก์ภายนอก
+  const sugars = N['sugars_100g'], fiber = N['fiber_100g'];
   return `
   <article class="card">
     <div class="imgwrap"><img alt="${n}" loading="lazy" src="${img}"></div>
